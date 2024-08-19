@@ -112,4 +112,8 @@ fclose(yyin);
 return 0;
 }
 
-preguntar si conviene 
+preguntar si conviene hacer java o c
+preguntar si conviene cerrar cada fc cerrandola y abrindola
+centro de que falta
+si masomenos esta bien
+
