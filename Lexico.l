@@ -16,6 +16,7 @@ int yyerror(void);
 
 DIGITO	[0-9]
 LETRA   [a-zA-Z]
+//CARACESP [@#$%&_]
 
 CTE {DIGITO}+
 CONST_REAL {DIGITO}+"."{DIGITO}+
@@ -49,6 +50,30 @@ LLA "{"
 LLC "}"
 COMA ","
 PUNTOCOMA ";"
+DEFINE "define"		
+INCLUDE "include"		
+MAIN "main"			
+RETURN "return"		
+VOID "void"			
+FLOAT "float"			
+CHAR "char"			
+INT "int"			
+STRING "string"		
+IF "if"			
+ELSE "else"   		
+FOR "for"			
+DO "do"	        
+ENDFOR "endfor"		
+WHILE "while"	        
+IN "in"	        
+ENDWHILE "endwhile"		
+SWITCH "switch"		
+CASE "case"			
+DEFAULT "default"		
+BREAK "break"			
+CONTINUE "continue"		
+GOTO "goto"			
+
 
 
 
@@ -57,7 +82,7 @@ PUNTOCOMA ";"
 {CTE}	        {printf("\nConstante: %s\n", yytext);return CTE;}
 {CONST_REAL}    {printf("\nConstanteReal: %s\n", yytext);return CONST_REAL;}
 {CONST_CHAR}    {printf("\nConstanteChar: %s\n", yytext);return CONST_CHAR;}
-{CONST_STRING}    {printf("\nConstanteString: %s\n", yytext);return CONST_STRING;}
+{CONST_STRING}  {printf("\nConstanteString: %s\n", yytext);return CONST_STRING;}
 {COMENTARIO}	{printf("\nComentario: %s\n", yytext);return COMENTARIO;}
 {ID}	        {printf("\nIdentificador: %s\n", yytext);return ID;}
 {OP_AS}	        {printf("\nAsignacion: %s\n", yytext);return OP_AS;}
@@ -79,24 +104,41 @@ PUNTOCOMA ";"
 {OP_DIV}        {printf("\nDivision: %s\n", yytext);return OP_DIV;}
 {PA}	        {printf("\nParAbre: %s\n", yytext);return PA;}
 {PC}	        {printf("\nParCierra: %s\n", yytext);return PC;}
-
-"define"		{return DEFINE;}
-"integer"		{return INTEGER;}
-"string"		{return STRING;}
-"if"			{return IF;}
-"else"   		{return ELSE;}
-"for"			{return FOR;}
-"do"	        {return DO;}
-"endfor"		{return ENDFOR;}
-"while"	        {return WHILE;}
-"in"	        {return IN;}
+{DEFINE}		{printf("\nDefine: %s\n", yytext);return DEFINE;}
+{INCLUDE}		{printf("\nInclude: %s\n", yytext);return INCLUDE;}
+{MAIN}			{printf("\nMain: %s\n", yytext);return MAIN;}
+{RETURN}		{printf("\nReturn: %s\n", yytext);return RETURN;}
+{VOID}			{printf("\nVoid: %s\n", yytext);return VOID;}
+{FLOAT}			{printf("\nFloat: %s\n", yytext);return FLOAT;}
+{CHAR}			{printf("\nChar: %s\n", yytext);return CHAR;}
+{INT}			{printf("\nInt: %s\n", yytext);return INT;}
+{STRING}		{printf("\nString: %s\n", yytext);return STRING;}
+{IF}			{printf("\nIf: %s\n", yytext);return IF;}
+{ELSE}   		{printf("\nElse: %s\n", yytext);return ELSE;}
+{FOR}			{printf("\nFor: %s\n", yytext);return FOR;}
+{DO}	        {printf("\nDo: %s\n", yytext);return DO;}
+{ENDFOR}		{printf("\nEndfor: %s\n", yytext);return ENDFOR;}
+{WHILE}	        {printf("\nWhile: %s\n", yytext);return WHILE;}
+{IN}	        {printf("\nIn: %s\n", yytext);return IN;}
+{ENDWHILE}		{printf("\nEndwhile: %s\n", yytext);return ENDWHILE;}
+{SWITCH}		{printf("\nSwitch: %s\n", yytext);return SWITCH;}
+{CASE}			{printf("\nCase: %s\n", yytext);return CASE;}
+{DEFAULT}		{printf("\nDefault: %s\n", yytext);return DEFAULT;}
+{BREAK}			{printf("\nBreak: %s\n", yytext);return BREAK;}
+{CONTINUE}		{printf("\nContinue: %s\n", yytext);return CONTINUE;}
+{GOTO}			{printf("\nGoto: %s\n", yytext);return GOTO;}
+{COMA}	        {printf("\nComa: %s\n", yytext);return COMA;}
+{PUNTOCOMA}	    {printf("\nPuntoComa: %s\n", yytext);return PUNTOCOMA;}
+{LLA}	        {printf("\nLlaveAbre: %s\n", yytext);return LLA;}
+{LLC}	        {printf("\nLlaveCierra: %s\n", yytext);return LLC;}
+{CA}	        {printf("\nCorcheteAbre: %s\n", yytext);return CA;}
+{CC}	        {printf("\nCorcheteCierra: %s\n", yytext);return CC;}
+.			 { printf( "ERROR LEXICO : Caracter no reconocido: %s\n", yytext ); exit (0);}
 
 %%
 
 "\n"
 "\t"
-
-.			 { printf( "ERROR LEXICO : Caracter no reconocido: %s\n", yytext ); exit (0);}
 
 int main(int argc,char *argv[])
 {
