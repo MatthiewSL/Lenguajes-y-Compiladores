@@ -78,7 +78,7 @@ GOTO "goto"
 
 
 %%
-
+//podria hacerse mas corto haciendo "CTE" {return CTE;}
 {CTE}	        {printf("\nConstante: %s\n", yytext);return CTE;}
 {CONST_REAL}    {printf("\nConstanteReal: %s\n", yytext);return CONST_REAL;}
 {CONST_CHAR}    {printf("\nConstanteChar: %s\n", yytext);return CONST_CHAR;}
