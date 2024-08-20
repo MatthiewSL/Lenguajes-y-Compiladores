@@ -1,6 +1,9 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <float.h> /*tiene el maximo de tamaño de reales de 32 bits*/
+#include <limits.h> /*tiene el maximo de tamaño de enteros de 16 bits*/
+#include <string.h>
 #include "y.tab.h"
 FILE *yyin;
 int yylval;
@@ -16,12 +19,12 @@ int yyerror(void);
 
 DIGITO	[0-9]
 LETRA   [a-zA-Z]
-//CARACESP [@#$%&_]
+CARACESP [@|#|$|%|&|_]
 
 CTE {DIGITO}+
-CONST_REAL {DIGITO}+"."{DIGITO}+
+CONST_REAL {DIGITO}+"."{DIGITO}+|{DIGITO}+"."{DIGITO}*|{DIGITO}*"."{DIGITO}+
 CONST_CHAR "'"{LETRA}"'"
-CONST_STRING {LETRA}+({LETRA}|{DIGITO})*
+CONST_STRING "\""{LETRA}+|{CARACESP}+({LETRA}|{DIGITO})*{0,40}"\""
 ID	{LETRA}({LETRA}|{DIGITO})*
 COMENTARIO "//"({LETRA}|{DIGITO})*"//"
 
@@ -59,12 +62,12 @@ FLOAT "float"
 CHAR "char"			
 INT "int"			
 STRING "string"		
+WHILE "while"	        
 IF "if"			
 ELSE "else"   		
 FOR "for"			
 DO "do"	        
 ENDFOR "endfor"		
-WHILE "while"	        
 IN "in"	        
 ENDWHILE "endwhile"		
 SWITCH "switch"		
@@ -74,15 +77,42 @@ BREAK "break"
 CONTINUE "continue"		
 GOTO "goto"			
 
-
-
-
+/*podria hacerse mas corto haciendo "CTE" {return CTE;}*/
 %%
-//podria hacerse mas corto haciendo "CTE" {return CTE;}
-{CTE}	        {printf("\nConstante: %s\n", yytext);return CTE;}
-{CONST_REAL}    {printf("\nConstanteReal: %s\n", yytext);return CONST_REAL;}
-{CONST_CHAR}    {printf("\nConstanteChar: %s\n", yytext);return CONST_CHAR;}
-{CONST_STRING}  {printf("\nConstanteString: %s\n", yytext);return CONST_STRING;}
+{CTE}	        { 
+                long value = atol(yytext); 
+                if (value < SHRT_MIN || value > SHRT_MAX) { 
+                    printf("ERROR: Constante entera fuera del rango de 16 bits: %s\n", yytext); 
+                    exit(1); 
+                } 
+                printf("\nConstante: %s\n", yytext); 
+                return CTE; 
+}
+{CONST_REAL}    {
+                float valor = atof(yytext);
+                if (valor < -FLT_MAX || valor > FLT_MAX) {
+                    printf("ERROR LEXICO: Constante real fuera de rango: %s\n", yytext);
+                    exit(0);
+                }
+                printf("\nConstanteReal: %s\n", yytext);
+                return CONST_REAL;
+                }
+{CONST_STRING}  { 
+                if (strlen(yytext) - 2 > 40) {  // -2 para ignorar las comillas
+                    printf("ERROR: String supera los 40 caracteres: %s\n", yytext); 
+                exit(1); 
+                }
+                printf("\nConstanteString: %s\n", yytext); 
+                return CONST_STRING; 
+}
+{CONST_CHAR}    { 
+                if (strlen(yytext) != 3) {  // 'X' tiene 3 caracteres (comilla, carácter, comilla)
+                    printf("ERROR: Constante char debe ser un solo carácter: %s\n", yytext); 
+                    exit(1); 
+                }
+                printf("\nConstanteChar: %s\n", yytext); 
+                return CONST_CHAR; 
+}
 {COMENTARIO}	{printf("\nComentario: %s\n", yytext);return COMENTARIO;}
 {ID}	        {printf("\nIdentificador: %s\n", yytext);return ID;}
 {OP_AS}	        {printf("\nAsignacion: %s\n", yytext);return OP_AS;}
@@ -109,8 +139,8 @@ GOTO "goto"
 {MAIN}			{printf("\nMain: %s\n", yytext);return MAIN;}
 {RETURN}		{printf("\nReturn: %s\n", yytext);return RETURN;}
 {VOID}			{printf("\nVoid: %s\n", yytext);return VOID;}
-{FLOAT}			{printf("\nFloat: %s\n", yytext);return FLOAT;}
 {CHAR}			{printf("\nChar: %s\n", yytext);return CHAR;}
+{FLOAT}			{printf("\nFloat: %s\n", yytext);return FLOAT;}
 {INT}			{printf("\nInt: %s\n", yytext);return INT;}
 {STRING}		{printf("\nString: %s\n", yytext);return STRING;}
 {IF}			{printf("\nIf: %s\n", yytext);return IF;}
@@ -133,12 +163,18 @@ GOTO "goto"
 {LLC}	        {printf("\nLlaveCierra: %s\n", yytext);return LLC;}
 {CA}	        {printf("\nCorcheteAbre: %s\n", yytext);return CA;}
 {CC}	        {printf("\nCorcheteCierra: %s\n", yytext);return CC;}
+" "             { printf("Espacio en blanco encontrado\n"); }
+"\t"            { printf("Tabulador encontrado\n"); }
+"\n"            { printf("Salto de linea encontrado\n"); }
 .			 { printf( "ERROR LEXICO : Caracter no reconocido: %s\n", yytext ); exit (0);}
 
 %%
 
-"\n"
-"\t"
+
+
+" "      ;  /*Ignorar espacios en blanco*/
+"\t"     ;  /*Ignorar tabulaciones*/
+"\n"     ;  /*Ignorar saltos de línea*/
 
 int main(int argc,char *argv[])
 {
@@ -154,8 +190,5 @@ fclose(yyin);
 return 0;
 }
 
-preguntar si conviene hacer java o c
-preguntar si conviene cerrar cada fc cerrandola y abrindola
-centro de que falta
-si masomenos esta bien
+
 
