@@ -26,7 +26,8 @@ CONST_REAL {DIGITO}+"."{DIGITO}+|{DIGITO}+"."{DIGITO}*|{DIGITO}*"."{DIGITO}+
 CONST_CHAR "'"{LETRA}"'"
 CONST_STRING "\""{LETRA}+|{CARACESP}+({LETRA}|{DIGITO})*{0,40}"\""
 ID	{LETRA}({LETRA}|{DIGITO})*
-COMENTARIO "//"({LETRA}|{DIGITO})*"//"
+COMENTARIO "/-"({LETRA}|{DIGITO})*"-/"
+
 
 OP_AS "="
 OP_COMP "=="
@@ -53,6 +54,7 @@ LLA "{"
 LLC "}"
 COMA ","
 PUNTOCOMA ";"
+INIT "init"
 DEFINE "define"		
 INCLUDE "include"		
 MAIN "main"			
@@ -76,6 +78,8 @@ DEFAULT "default"
 BREAK "break"			
 CONTINUE "continue"		
 GOTO "goto"			
+leer "leer"
+escribir "escribir"
 
 /*podria hacerse mas corto haciendo "CTE" {return CTE;}*/
 %%
@@ -113,6 +117,7 @@ GOTO "goto"
                 printf("\nConstanteChar: %s\n", yytext); 
                 return CONST_CHAR; 
 }
+{INIT}          {printf("\nInit: %s\n", yytext);return INIT;}
 {COMENTARIO}	{printf("\nComentario: %s\n", yytext);return COMENTARIO;}
 {ID}	        {printf("\nIdentificador: %s\n", yytext);return ID;}
 {OP_AS}	        {printf("\nAsignacion: %s\n", yytext);return OP_AS;}
