@@ -7,3 +7,4 @@ hace falta automata si uso jcup o algo de eso? <br/>
 que funciones puedo poner en los tokens? <br/>
 como hacer la tabla <br/>
 como hago para que la tabla determine que id va con cada lexema <br/>
+como hago que el init quede entre llaves (que sea un bloque)
