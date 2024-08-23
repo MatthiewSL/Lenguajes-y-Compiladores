@@ -78,8 +78,8 @@ DEFAULT "default"
 BREAK "break"			
 CONTINUE "continue"		
 GOTO "goto"			
-leer "leer"
-escribir "escribir"
+LEER "leer"
+ESCRIBIR "escribir"
 
 /*podria hacerse mas corto haciendo "CTE" {return CTE;}*/
 %%
@@ -168,6 +168,8 @@ escribir "escribir"
 {LLC}	        {printf("\nLlaveCierra: %s\n", yytext);return LLC;}
 {CA}	        {printf("\nCorcheteAbre: %s\n", yytext);return CA;}
 {CC}	        {printf("\nCorcheteCierra: %s\n", yytext);return CC;}
+{LEER}	        {printf("\nLeer: %s\n", yytext);return LEER;}
+{ESCRIBIR}	        {printf("\nEscribir: %s\n", yytext);return ESCRIBIR;}
 " "             { printf("Espacio en blanco encontrado\n"); }
 "\t"            { printf("Tabulador encontrado\n"); }
 "\n"            { printf("Salto de linea encontrado\n"); }
