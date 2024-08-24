@@ -29,7 +29,7 @@ ID	{LETRA}({LETRA}|{DIGITO})*
 COMENTARIO "*-"({LETRA}|{DIGITO})*"-*"
 
 
-OP_AS "="
+OP_AS ":="
 OP_COMP "=="
 OP_DIF "!="
 OP_MAYOR ">"
@@ -52,6 +52,9 @@ CA "["
 CC "]"
 LLA "{"
 LLC "}"
+MIENTRAS "mientras"	        
+SI "si"			
+SINO "sino"   		
 COMA ","
 PUNTOCOMA ";"
 INIT "init"
@@ -64,9 +67,6 @@ FLOAT "float"
 CHAR "char"			
 INT "int"			
 STRING "string"		
-WHILE "while"	        
-IF "if"			
-ELSE "else"   		
 FOR "for"			
 DO "do"	        
 ENDFOR "endfor"		
@@ -118,7 +118,7 @@ ESCRIBIR "escribir"
                 return CONST_CHAR; 
 }
 {INIT}          {printf("\nInit: %s\n", yytext);return INIT;}
-{COMENTARIO}	{printf("\nComentario: %s\n", yytext);return COMENTARIO;}
+//{COMENTARIO}	{printf("\nComentario: %s\n", yytext);return COMENTARIO;} no lo tiene que devolver
 {ID}	        {printf("\nIdentificador: %s\n", yytext);return ID;}
 {OP_AS}	        {printf("\nAsignacion: %s\n", yytext);return OP_AS;}
 {OP_COMP}       {printf("\nComparacion: %s\n", yytext);return OP_COMP;}
@@ -148,12 +148,12 @@ ESCRIBIR "escribir"
 {FLOAT}			{printf("\nFloat: %s\n", yytext);return FLOAT;}
 {INT}			{printf("\nInt: %s\n", yytext);return INT;}
 {STRING}		{printf("\nString: %s\n", yytext);return STRING;}
-{IF}			{printf("\nIf: %s\n", yytext);return IF;}
-{ELSE}   		{printf("\nElse: %s\n", yytext);return ELSE;}
+{SI}			{printf("\nSi: %s\n", yytext);return SI;}
+{SINO}   		{printf("\nSino: %s\n", yytext);return SINO;}
 {FOR}			{printf("\nFor: %s\n", yytext);return FOR;}
 {DO}	        {printf("\nDo: %s\n", yytext);return DO;}
 {ENDFOR}		{printf("\nEndfor: %s\n", yytext);return ENDFOR;}
-{WHILE}	        {printf("\nWhile: %s\n", yytext);return WHILE;}
+{MIENTRAS}	        {printf("\nMientras: %s\n", yytext);return MIENTRAS;}
 {IN}	        {printf("\nIn: %s\n", yytext);return IN;}
 {ENDWHILE}		{printf("\nEndwhile: %s\n", yytext);return ENDWHILE;}
 {SWITCH}		{printf("\nSwitch: %s\n", yytext);return SWITCH;}
