@@ -29,6 +29,7 @@ ID	{LETRA}({LETRA}|{DIGITO})*
 COMENTARIO "*-"({LETRA}|{DIGITO})*"-*"
 
 
+// Operadores
 OP_AS ":="
 OP_COMP "=="
 OP_DIF "!="
@@ -46,17 +47,19 @@ OP_SUM "+"
 OP_MUL "*"
 OP_RES "-"
 OP_DIV "/"
+
+// Bloques
 PA "("
 PC ")"
 CA "["
 CC "]"
 LLA "{"
 LLC "}"
+
+// Palabras reservadas
 MIENTRAS "mientras"	        
 SI "si"			
 SINO "sino"   		
-COMA ","
-PUNTOCOMA ";"
 INIT "init"
 DEFINE "define"		
 INCLUDE "include"		
@@ -67,22 +70,21 @@ FLOAT "float"
 CHAR "char"			
 INT "int"			
 STRING "string"		
-FOR "for"			
-DO "do"	        
-ENDFOR "endfor"		
 IN "in"	        
 ENDWHILE "endwhile"		
-SWITCH "switch"		
-CASE "case"			
-DEFAULT "default"		
 BREAK "break"			
 CONTINUE "continue"		
-GOTO "goto"			
 LEER "leer"
 ESCRIBIR "escribir"
 
+// Otros
+COMA ","
+PUNTOCOMA ";"
+
+
 /*podria hacerse mas corto haciendo "CTE" {return CTE;}*/
 %%
+// Constantes
 {CTE}	        { 
                 long value = atol(yytext); 
                 if (value < SHRT_MIN || value > SHRT_MAX) { 
@@ -104,7 +106,7 @@ ESCRIBIR "escribir"
 {CONST_STRING}  { 
                 if (strlen(yytext) - 2 > 40) {  // -2 para ignorar las comillas
                     printf("ERROR: String supera los 40 caracteres: %s\n", yytext); 
-                exit(1); 
+                    exit(1); 
                 }
                 printf("\nConstanteString: %s\n", yytext); 
                 return CONST_STRING; 
@@ -117,9 +119,32 @@ ESCRIBIR "escribir"
                 printf("\nConstanteChar: %s\n", yytext); 
                 return CONST_CHAR; 
 }
+
+//{COMENTARIO}	{printf("\nComentario: %s\n", yytext);return 
+
+// Palabras reservadas
 {INIT}          {printf("\nInit: %s\n", yytext);return INIT;}
-//{COMENTARIO}	{printf("\nComentario: %s\n", yytext);return COMENTARIO;} no lo tiene que devolver
 {ID}	        {printf("\nIdentificador: %s\n", yytext);return ID;}
+{DEFINE}		{printf("\nDefine: %s\n", yytext);return DEFINE;}
+{INCLUDE}		{printf("\nInclude: %s\n", yytext);return INCLUDE;}
+{MAIN}			{printf("\nMain: %s\n", yytext);return MAIN;}
+{RETURN}		{printf("\nReturn: %s\n", yytext);return RETURN;}
+{VOID}			{printf("\nVoid: %s\n", yytext);return VOID;}
+{CHAR}			{printf("\nChar: %s\n", yytext);return CHAR;}
+{FLOAT}			{printf("\nFloat: %s\n", yytext);return FLOAT;}
+{INT}			{printf("\nInt: %s\n", yytext);return INT;}
+{STRING}		{printf("\nString: %s\n", yytext);return STRING;}
+{SI}			{printf("\nSi: %s\n", yytext);return SI;}
+{SINO}   		{printf("\nSino: %s\n", yytext);return SINO;}
+{MIENTRAS}	    {printf("\nMientras: %s\n", yytext);return MIENTRAS;}
+{IN}	        {printf("\nIn: %s\n", yytext);return IN;}
+{ENDWHILE}		{printf("\nEndwhile: %s\n", yytext);return ENDWHILE;}
+{BREAK}			{printf("\nBreak: %s\n", yytext);return BREAK;}
+{CONTINUE}		{printf("\nContinue: %s\n", yytext);return CONTINUE;}
+{LEER}	        {printf("\nLeer: %s\n", yytext);return LEER;}
+{ESCRIBIR}	    {printf("\nEscribir: %s\n", yytext);return ESCRIBIR;}
+
+// Operadores
 {OP_AS}	        {printf("\nAsignacion: %s\n", yytext);return OP_AS;}
 {OP_COMP}       {printf("\nComparacion: %s\n", yytext);return OP_COMP;}
 {OP_DIF}        {printf("\nDiferenteDe: %s\n", yytext);return OP_DIF;}
@@ -137,51 +162,32 @@ ESCRIBIR "escribir"
 {OP_MUL}        {printf("\nMultiplicacion: %s\n", yytext);return OP_MUL;}
 {OP_RES}        {printf("\nResta: %s\n", yytext);return OP_RES;}
 {OP_DIV}        {printf("\nDivision: %s\n", yytext);return OP_DIV;}
+
+// Bloques
 {PA}	        {printf("\nParAbre: %s\n", yytext);return PA;}
 {PC}	        {printf("\nParCierra: %s\n", yytext);return PC;}
-{DEFINE}		{printf("\nDefine: %s\n", yytext);return DEFINE;}
-{INCLUDE}		{printf("\nInclude: %s\n", yytext);return INCLUDE;}
-{MAIN}			{printf("\nMain: %s\n", yytext);return MAIN;}
-{RETURN}		{printf("\nReturn: %s\n", yytext);return RETURN;}
-{VOID}			{printf("\nVoid: %s\n", yytext);return VOID;}
-{CHAR}			{printf("\nChar: %s\n", yytext);return CHAR;}
-{FLOAT}			{printf("\nFloat: %s\n", yytext);return FLOAT;}
-{INT}			{printf("\nInt: %s\n", yytext);return INT;}
-{STRING}		{printf("\nString: %s\n", yytext);return STRING;}
-{SI}			{printf("\nSi: %s\n", yytext);return SI;}
-{SINO}   		{printf("\nSino: %s\n", yytext);return SINO;}
-{FOR}			{printf("\nFor: %s\n", yytext);return FOR;}
-{DO}	        {printf("\nDo: %s\n", yytext);return DO;}
-{ENDFOR}		{printf("\nEndfor: %s\n", yytext);return ENDFOR;}
-{MIENTRAS}	        {printf("\nMientras: %s\n", yytext);return MIENTRAS;}
-{IN}	        {printf("\nIn: %s\n", yytext);return IN;}
-{ENDWHILE}		{printf("\nEndwhile: %s\n", yytext);return ENDWHILE;}
-{SWITCH}		{printf("\nSwitch: %s\n", yytext);return SWITCH;}
-{CASE}			{printf("\nCase: %s\n", yytext);return CASE;}
-{DEFAULT}		{printf("\nDefault: %s\n", yytext);return DEFAULT;}
-{BREAK}			{printf("\nBreak: %s\n", yytext);return BREAK;}
-{CONTINUE}		{printf("\nContinue: %s\n", yytext);return CONTINUE;}
-{GOTO}			{printf("\nGoto: %s\n", yytext);return GOTO;}
-{COMA}	        {printf("\nComa: %s\n", yytext);return COMA;}
-{PUNTOCOMA}	    {printf("\nPuntoComa: %s\n", yytext);return PUNTOCOMA;}
 {LLA}	        {printf("\nLlaveAbre: %s\n", yytext);return LLA;}
 {LLC}	        {printf("\nLlaveCierra: %s\n", yytext);return LLC;}
 {CA}	        {printf("\nCorcheteAbre: %s\n", yytext);return CA;}
 {CC}	        {printf("\nCorcheteCierra: %s\n", yytext);return CC;}
-{LEER}	        {printf("\nLeer: %s\n", yytext);return LEER;}
-{ESCRIBIR}	        {printf("\nEscribir: %s\n", yytext);return ESCRIBIR;}
+
+// Otros
+{COMA}	        {printf("\nComa: %s\n", yytext);return COMA;}
+{PUNTOCOMA}	    {printf("\nPuntoComa: %s\n", yytext);return PUNTOCOMA;}
+
+// Espacios y errores
 " "             { printf("Espacio en blanco encontrado\n"); }
 "\t"            { printf("Tabulador encontrado\n"); }
 "\n"            { printf("Salto de linea encontrado\n"); }
-.			 { printf( "ERROR LEXICO : Caracter no reconocido: %s\n", yytext ); exit (0);}
+.			     { printf("ERROR LEXICO: Caracter no reconocido: %s\n", yytext); exit(0);}
+
 
 %%
 
-
-
-" "      ;  /*Ignorar espacios en blanco*/
-"\t"     ;  /*Ignorar tabulaciones*/
-"\n"     ;  /*Ignorar saltos de línea*/
+//NOSE QUE ONDA
+// " "      ;  /*Ignorar espacios en blanco*/
+// "\t"     ;  /*Ignorar tabulaciones*/
+// "\n"     ;  /*Ignorar saltos de línea*/
 
 int main(int argc,char *argv[])
 {

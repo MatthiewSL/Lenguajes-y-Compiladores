@@ -1,0 +1,363 @@
+// Usa Lexico_ClasePractica
+//Solo expresiones sin ()
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include "y.tab.h"
+
+int yystopparser=0;
+FILE  *yyin;
+int yyerror();
+int yylex();
+%}
+
+//Constantes
+%token CTE
+%token CONST_REAL
+%token CONST_STRING
+%token CONST_CHAR
+
+//Palabras reservadas
+%token INIT
+%token DEFINE
+%token INCLUDE
+%token MAIN
+%token RETURN
+%token VOID
+%token CHAR
+%token INT
+%token FLOAT
+%token STRING
+%token SI
+%token SINO
+%token MIENTRAS
+%token IN
+%token ENDWHILE
+%token BREAK
+%token CONTINUE
+%token LEER
+%token ESCRIBIR
+
+//Operadores
+%token OP_AS
+%token OP_COMP
+%token OP_DIF
+%token OP_MAYOR
+%token OP_MENOR
+%token OP_MAYORIG
+%token OP_MENORIG
+%token OP_AND
+%token OP_OR
+%token OP_NOT
+%token OP_MOD
+%token OP_INC
+%token OP_DEC
+%token OP_SUM
+%token OP_MUL
+%token OP_RES
+%token OP_DIV
+
+//Bloques
+%token LLA
+%token LLC
+%token CA
+%token CC
+%token PA
+%token PC
+
+//Otros
+%token ID
+%token COMA
+%token PUNTOCOMA
+
+
+%%
+programa:
+    INT MAIN PA PC LLA instrucciones LLC {
+        printf("Programa correcto\n");
+        //Aca iria la tabla de simbolos
+    }
+
+instrucciones:
+    bloque_dec bloque | bloque
+
+bloque_dec:
+    INIT LLA declaracion LLC
+
+declaracion:
+    ID, declaracion | ID : tipo PUNTOCOMA
+
+tipo:
+    INT | FLOAT | CHAR | STRING
+
+sentencia:
+    asignacion PUNTO_COMA
+	| bloque_if
+	| bloque_while
+	| lectura PUNTO_COMA
+	| escritura PUNTO_COMA
+
+bloque:
+    bloque sentencia | sentencia
+
+// ASIGNACIONES
+asignacion:
+    ID OP_AS expresion //Aca chequear que la variable exista y que sea del tipo de la tabla
+
+expresion:
+    expresion_string | expresion_aritmetica | expresion_id
+
+expresion_string:
+    CONST_STRING
+
+expresion_id:
+    ID
+
+expresion_aritmetica:
+    termino 
+    | expresion_aritmetica OP_SUM termino
+    | expresion_aritmetica OP_RES termino
+
+termino:
+    factor
+    | termino OP_MUL factor
+    | termino OP_DIV factor
+
+factor:
+    ID
+    | CONST_REAL
+    | CONST_CHAR
+    | CONST_STRING
+    | CTE
+    | PA expresion_aritmetica PC
+
+//BLOQUES ESPECIALES
+bloque_if:
+    SI PA expresion_logica PC LLA instrucciones LLC
+    | SI PA expresion_logica PC LLA instrucciones LLC SINO LLA instrucciones LLC
+
+expresion_logica:
+    termino_logico AND termino_logico
+    | termino_logico OR termino_logico
+    | NOT termino_logico
+    | termino_logico
+
+termino_logico:
+    expresion_aritmetica comp_bool expresion_aritmetica
+
+comp_bool:
+    OP_COMP
+    | OP_DIF
+    | OP_MAYOR
+    | OP_MENOR
+    | OP_MAYORIG
+    | OP_MENORIG
+
+bloque_while:
+    MIENTRAS PA expresion_logica PC LLA instrucciones LLC
+
+lectura:
+    LEER PA ID PC
+
+escritura:
+    ESCRIBIR PA valor_escritura PC
+
+valor_escritura:
+    ID
+    | CONST_STRING
+
+%%
+
+/* Devuleve la posici�n en la que se encuentra el elemento buscado, -1 si no encontr� el elemento */
+int buscarEnTabla(char * name){
+   int i=0;
+   while(i<=fin_tabla){
+	   if(strcmp(tabla_simbolo[i].nombre,name) == 0){
+		   return i;
+	   }
+	   i++;
+   }
+   return -1;
+}
+
+/** Escribe el nombre de una variable o constante en la posición indicada */
+void escribirNombreEnTabla(char* nombre, int pos){
+	strcpy(tabla_simbolo[pos].nombre, nombre);
+}
+
+ /** Agrega un nuevo nombre de variable a la tabla **/
+ void agregarVarATabla(char* nombre){
+	 //Si se llena, error
+	 if(fin_tabla >= TAMANIO_TABLA - 1){
+		 printf("Error: me quede sin espacio en la tabla de simbolos. Sori, gordi.\n");
+		 system("Pause");
+		 exit(2);
+	 }
+	 //Si no hay otra variable con el mismo nombre...
+	 if(buscarEnTabla(nombre) == -1){
+		 //Agregar a tabla
+		 fin_tabla++;
+		 escribirNombreEnTabla(nombre, fin_tabla);
+	 }
+	 else yyerror("Encontre dos declaraciones de variables con el mismo nombre. Decidite."); //Error, ya existe esa variable
+
+ }
+
+/** Agrega los tipos de datos a las variables declaradas. Usa las variables globales varADeclarar1, cantVarsADeclarar y tipoDatoADeclarar */
+void agregarTiposDatosATabla(){
+	for(int i = 0; i < cantVarsADeclarar; i++){
+		tabla_simbolo[varADeclarar1 + i].tipo_dato = tipoDatoADeclarar;
+	}
+}
+
+/** Guarda la tabla de simbolos en un archivo de texto */
+void guardarTabla(){
+	if(fin_tabla == -1)
+		yyerror("No encontre la tabla de simbolos");
+
+	FILE* arch = fopen("ts.txt", "w+");
+	if(!arch){
+		printf("No pude crear el archivo ts.txt\n");
+		return;
+	}
+
+	for(int i = 0; i <= fin_tabla; i++){
+		fprintf(arch, "%s\t", &(tabla_simbolo[i].nombre) );
+
+		switch (tabla_simbolo[i].tipo_dato){
+		case Float:
+			fprintf(arch, "FLOAT");
+			break;
+		case Int:
+			fprintf(arch, "INT");
+			break;
+		case String:
+			fprintf(arch, "STRING");
+			break;
+		case CteFloat:
+			fprintf(arch, "CTE_FLOAT\t%f", tabla_simbolo[i].valor_f);
+			break;
+		case CteInt:
+			fprintf(arch, "CTE_INT\t%d", tabla_simbolo[i].valor_i);
+			break;
+		case CteString:
+			fprintf(arch, "CTE_STRING\t%s\t%d", &(tabla_simbolo[i].valor_s), tabla_simbolo[i].longitud);
+			break;
+		}
+
+		fprintf(arch, "\n");
+	}
+	fclose(arch);
+}
+
+/* Calculo que estas 3 funciones se podrían juntar en una sola */
+
+/** Agrega una constante string a la tabla de simbolos */
+void agregarCteStringATabla(char* nombre){
+	if(fin_tabla >= TAMANIO_TABLA - 1){
+		printf("Error: me quede sin espacio en la tabla de simbolos. Sori, gordi.\n");
+		system("Pause");
+		exit(2);
+	}
+
+	//Si no hay otra variable con el mismo nombre...
+	if(buscarEnTabla(nombre) == -1){
+		//Agregar nombre a tabla
+		fin_tabla++;
+		escribirNombreEnTabla(nombre, fin_tabla);
+
+		//Agregar tipo de dato
+		tabla_simbolo[fin_tabla].tipo_dato = CteString;
+
+		//Agregar valor a la tabla
+		strcpy(tabla_simbolo[fin_tabla].valor_s, nombre+1); //nombre+1 es para no copiar el _ del principio
+
+		//Agregar longitud
+		tabla_simbolo[fin_tabla].longitud = strlen(nombre) - 1;
+	}
+}
+
+/** Agrega una constante real a la tabla de simbolos */
+void agregarCteFloatATabla(float valor){
+	if(fin_tabla >= TAMANIO_TABLA - 1){
+		printf("Error: me quede sin espacio en la tabla de simbolos. Sori, gordi.\n");
+		system("Pause");
+		exit(2);
+	}
+
+	//Genero el nombre
+	char nombre[12];
+	sprintf(nombre, "_%f", valor);
+
+	//Si no hay otra variable con el mismo nombre...
+	if(buscarEnTabla(nombre) == -1){
+		//Agregar nombre a tabla
+		fin_tabla++;
+		escribirNombreEnTabla(nombre, fin_tabla);
+
+		//Agregar tipo de dato
+		tabla_simbolo[fin_tabla].tipo_dato = CteFloat;
+
+		//Agregar valor a la tabla
+		tabla_simbolo[fin_tabla].valor_f = valor;
+	}
+}
+
+/** Agrega una constante entera a la tabla de simbolos */
+void agregarCteIntATabla(int valor){
+	if(fin_tabla >= TAMANIO_TABLA - 1){
+		printf("Error: me quede sin espacio en la tabla de simbolos. Sori, gordi.\n");
+		system("Pause");
+		exit(2);
+	}
+
+	//Genero el nombre
+	char nombre[30];
+	sprintf(nombre, "_%d", valor);
+
+	//Si no hay otra variable con el mismo nombre...
+	if(buscarEnTabla(nombre) == -1){
+		//Agregar nombre a tabla
+		fin_tabla++;
+		escribirNombreEnTabla(nombre, fin_tabla);
+
+		//Agregar tipo de dato
+		tabla_simbolo[fin_tabla].tipo_dato = CteInt;
+
+		//Agregar valor a la tabla
+		tabla_simbolo[fin_tabla].valor_i = valor;
+	}
+}
+
+/** Se fija si ya existe una entrada con ese nombre en la tabla de simbolos. Si no existe, muestra un error de variable sin declarar y aborta la compilacion. */
+void chequearVarEnTabla(char* nombre){
+	//Si no existe en la tabla, error
+	if( buscarEnTabla(nombre) == -1){
+		char msg[100];
+		sprintf(msg,"%s? No, man, tenes que declarar las variables arriba. Esto no es un viva la pepa como java...", nombre);
+		yyerror(msg);
+	}
+	//Si existe en la tabla, dejo que la compilacion siga
+}
+
+int main(int argc, char *argv[])
+{
+    if((yyin = fopen(argv[1], "rt"))==NULL)
+    {
+        printf("\nNo se puede abrir el archivo de prueba: %s\n", argv[1]);
+       
+    }
+    else
+    { 
+        
+        yyparse();
+        
+    }
+	fclose(yyin);
+        return 0;
+}
+int yyerror(void)
+     {
+       printf("Error Sintactico\n");
+	 exit (1);
+     }
