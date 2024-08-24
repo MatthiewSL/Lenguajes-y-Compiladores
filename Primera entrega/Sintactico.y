@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "y.tab.h"
+#include "tabla.h"
 
 int yystopparser=0;
 FILE  *yyin;
@@ -75,7 +76,7 @@ int yylex();
 programa:
     INT MAIN PA PC LLA instrucciones LLC {
         printf("Programa correcto\n");
-        //Aca iria la tabla de simbolos
+        //Aca guardo la tabla de simbolos
     }
 
 instrucciones:
@@ -180,34 +181,24 @@ int buscarEnTabla(char * name){
    return -1;
 }
 
-/** Escribe el nombre de una variable o constante en la posición indicada */
-void escribirNombreEnTabla(char* nombre, int pos){
-	strcpy(tabla_simbolo[pos].nombre, nombre);
-}
 
- /** Agrega un nuevo nombre de variable a la tabla **/
- void agregarVarATabla(char* nombre){
-	 //Si se llena, error
-	 if(fin_tabla >= TAMANIO_TABLA - 1){
-		 printf("Error: me quede sin espacio en la tabla de simbolos. Sori, gordi.\n");
-		 system("Pause");
-		 exit(2);
-	 }
-	 //Si no hay otra variable con el mismo nombre...
-	 if(buscarEnTabla(nombre) == -1){
-		 //Agregar a tabla
-		 fin_tabla++;
-		 escribirNombreEnTabla(nombre, fin_tabla);
-	 }
-	 else yyerror("Encontre dos declaraciones de variables con el mismo nombre. Decidite."); //Error, ya existe esa variable
-
- }
-
-/** Agrega los tipos de datos a las variables declaradas. Usa las variables globales varADeclarar1, cantVarsADeclarar y tipoDatoADeclarar */
-void agregarTiposDatosATabla(){
-	for(int i = 0; i < cantVarsADeclarar; i++){
-		tabla_simbolo[varADeclarar1 + i].tipo_dato = tipoDatoADeclarar;
+//Cuando se declara una variable inserto un campo en la tabla de simbolos
+void insertarVarATabla(char *nombre, int tipo){
+	if(fin_tabla >= TAMANIO_TABLA - 1){
+		printf("Error: me quede sin espacio en la tabla de simbolos. Sori, gordi.\n");
+		system("Pause");
+		exit(2);
 	}
+	//Si no hay otra variable con el mismo nombre...
+	if(buscarEnTabla(nombre) == -1){
+		//Agregar nombre a tabla
+		fin_tabla++;
+		escribirNombreEnTabla(nombre, fin_tabla);
+
+		//Agregar tipo de dato
+		tabla_simbolo[fin_tabla].tipo_dato = tipo;
+	}
+	else yyerror("Encontre dos declaraciones de variables con el mismo nombre. Decidite."); //Error, ya existe esa variable
 }
 
 /** Guarda la tabla de simbolos en un archivo de texto */
@@ -250,10 +241,8 @@ void guardarTabla(){
 	fclose(arch);
 }
 
-/* Calculo que estas 3 funciones se podrían juntar en una sola */
-
-/** Agrega una constante string a la tabla de simbolos */
-void agregarCteStringATabla(char* nombre){
+/** Agrega una constante a la tabla de simbolos con el tipo ese*/
+void agregarCteATabla(char* nombre,char* tipo){
 	if(fin_tabla >= TAMANIO_TABLA - 1){
 		printf("Error: me quede sin espacio en la tabla de simbolos. Sori, gordi.\n");
 		system("Pause");
@@ -277,60 +266,8 @@ void agregarCteStringATabla(char* nombre){
 	}
 }
 
-/** Agrega una constante real a la tabla de simbolos */
-void agregarCteFloatATabla(float valor){
-	if(fin_tabla >= TAMANIO_TABLA - 1){
-		printf("Error: me quede sin espacio en la tabla de simbolos. Sori, gordi.\n");
-		system("Pause");
-		exit(2);
-	}
-
-	//Genero el nombre
-	char nombre[12];
-	sprintf(nombre, "_%f", valor);
-
-	//Si no hay otra variable con el mismo nombre...
-	if(buscarEnTabla(nombre) == -1){
-		//Agregar nombre a tabla
-		fin_tabla++;
-		escribirNombreEnTabla(nombre, fin_tabla);
-
-		//Agregar tipo de dato
-		tabla_simbolo[fin_tabla].tipo_dato = CteFloat;
-
-		//Agregar valor a la tabla
-		tabla_simbolo[fin_tabla].valor_f = valor;
-	}
-}
-
-/** Agrega una constante entera a la tabla de simbolos */
-void agregarCteIntATabla(int valor){
-	if(fin_tabla >= TAMANIO_TABLA - 1){
-		printf("Error: me quede sin espacio en la tabla de simbolos. Sori, gordi.\n");
-		system("Pause");
-		exit(2);
-	}
-
-	//Genero el nombre
-	char nombre[30];
-	sprintf(nombre, "_%d", valor);
-
-	//Si no hay otra variable con el mismo nombre...
-	if(buscarEnTabla(nombre) == -1){
-		//Agregar nombre a tabla
-		fin_tabla++;
-		escribirNombreEnTabla(nombre, fin_tabla);
-
-		//Agregar tipo de dato
-		tabla_simbolo[fin_tabla].tipo_dato = CteInt;
-
-		//Agregar valor a la tabla
-		tabla_simbolo[fin_tabla].valor_i = valor;
-	}
-}
-
 /** Se fija si ya existe una entrada con ese nombre en la tabla de simbolos. Si no existe, muestra un error de variable sin declarar y aborta la compilacion. */
-void chequearVarEnTabla(char* nombre){
+void nombreRepetido(char* nombre){
 	//Si no existe en la tabla, error
 	if( buscarEnTabla(nombre) == -1){
 		char msg[100];
