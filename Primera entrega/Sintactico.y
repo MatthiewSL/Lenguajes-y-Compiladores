@@ -32,10 +32,6 @@ int yylex();
 %token SI
 %token SINO
 %token MIENTRAS
-%token IN
-%token ENDWHILE
-%token BREAK
-%token CONTINUE
 %token LEER
 %token ESCRIBIR
 
@@ -70,6 +66,7 @@ int yylex();
 %token ID
 %token COMA
 %token PUNTOCOMA
+
 
 
 %%
