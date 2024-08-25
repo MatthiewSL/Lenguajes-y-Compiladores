@@ -73,8 +73,8 @@ int yylex();
 programa:
     INT MAIN PA PC LLA instrucciones LLC {
         printf("Programa correcto\n");
-        //Aca guardo la tabla de simbolos
-    }
+        guardarTabla();
+		}
 
 instrucciones:
     bloque_dec bloque | bloque {printf("Instrucciones correcto\n");}
@@ -83,7 +83,10 @@ bloque_dec:
     INIT LLA declaracion LLC {printf("Bloque_dec correcto\n");}
 
 declaracion:
-    ID, declaracion | ID : tipo PUNTOCOMA {printf("Declaracion correcto\n");}
+    ID, declaracion | ID : tipo PUNTOCOMA {
+		agregarATabla($1,tipo);
+
+		printf("Declaracion correcto\n");}
 
 tipo:
     INT | FLOAT | CHAR | STRING {printf("Tipo correcto\n");}
@@ -239,9 +242,9 @@ void guardarTabla(){
 }
 
 /** Agrega una constante a la tabla de simbolos con el tipo ese*/
-void agregarCteATabla(char* nombre,char* tipo){
-	if(fin_tabla >= TAMANIO_TABLA - 1){
-		printf("Error: me quede sin espacio en la tabla de simbolos. Sori, gordi.\n");
+void agregarATabla(char* nombre,char* tipo){
+	if(cantVarInsertadas >=TAMANIO_TABLA){
+		printf("Error: me quede sin espacio.\n");
 		system("Pause");
 		exit(2);
 	}
@@ -249,30 +252,54 @@ void agregarCteATabla(char* nombre,char* tipo){
 	//Si no hay otra variable con el mismo nombre...
 	if(buscarEnTabla(nombre) == -1){
 		//Agregar nombre a tabla
-		fin_tabla++;
-		escribirNombreEnTabla(nombre, fin_tabla);
+		cantVarInsertadas++;
 
 		//Agregar tipo de dato
-		tabla_simbolo[fin_tabla].tipo_dato = CteString;
+		strcpy(tabla[cantVarInsertadas].tipo,tipo);
 
 		//Agregar valor a la tabla
-		strcpy(tabla_simbolo[fin_tabla].valor_s, nombre+1); //nombre+1 es para no copiar el _ del principio
+		strcpy(tabla[cantVarInsertadas].nombre,nombre); 
 
 		//Agregar longitud
-		tabla_simbolo[fin_tabla].longitud = strlen(nombre) - 1;
+		tabla[cantVarInsertadas].longitud = strlen(nombre); 
+	}
+	else{
+		printf("no se pueden ingresar variables con nombre repetido.\n");
+		system("Pause");
+		exit(2);
 	}
 }
 
-/** Se fija si ya existe una entrada con ese nombre en la tabla de simbolos. Si no existe, muestra un error de variable sin declarar y aborta la compilacion. */
-void nombreRepetido(char* nombre){
-	//Si no existe en la tabla, error
-	if( buscarEnTabla(nombre) == -1){
-		char msg[100];
-		sprintf(msg,"%s? No, man, tenes que declarar las variables arriba. Esto no es un viva la pepa como java...", nombre);
-		yyerror(msg);
-	}
-	//Si existe en la tabla, dejo que la compilacion siga
+int buscarEnTabla(char* nombre){
+
+	for(i=0;i<cantVarInsertadas,i++){
+		for (int i = 0; i < tamaño; i++) {
+        if (strcmp(tabla[i].Nombre, nombre) == 0) {
+            return i; // Retorna el índice del nombre encontrado
+        }
+    }
+    return -1; // Retorna -1 si el nombre no se encuentra
 }
+
+}
+
+void guardarTabla() {
+    FILE *archivo = fopen("symbol-table.txt", "wt");
+    if (archivo == NULL) {
+        printf("Error al abrir el archivo.\n");
+        exit(1);
+    }
+
+    for (int i = 0; i < cantVarInsertadas; i++) {
+        fprintf(archivo, "Nombre: %s, Tipo de dato: %s, Longitud: %d\n",
+                tabla[i].nombre, tabla[i].tipo, tabla[i].longitud);
+    }
+
+    fclose(archivo);
+    printf("Informacion guardada en el archivo symbol-table.txt .\n");
+}
+
+
 
 int main(int argc, char *argv[])
 {
