@@ -69,18 +69,13 @@ VOID "void"
 FLOAT "float"			
 CHAR "char"			
 INT "int"			
-STRING "string"		
-IN "in"	        
-ENDWHILE "endwhile"		
-BREAK "break"			
-CONTINUE "continue"		
+STRING "string"					
 LEER "leer"
 ESCRIBIR "escribir"
 
 // Otros
 COMA ","
 PUNTOCOMA ";"
-
 
 /*podria hacerse mas corto haciendo "CTE" {return CTE;}*/
 %%
@@ -120,7 +115,6 @@ PUNTOCOMA ";"
                 return CONST_CHAR; 
 }
 
-//{COMENTARIO}	{printf("\nComentario: %s\n", yytext);return 
 
 // Palabras reservadas
 {INIT}          {printf("\nInit: %s\n", yytext);return INIT;}
@@ -174,6 +168,7 @@ PUNTOCOMA ";"
 // Otros
 {COMA}	        {printf("\nComa: %s\n", yytext);return COMA;}
 {PUNTOCOMA}	    {printf("\nPuntoComa: %s\n", yytext);return PUNTOCOMA;}
+{COMENTARIO}	{printf("\nComentario: %s\n", yytext);}
 
 // Espacios y errores
 " "             { printf("Espacio en blanco encontrado\n"); }
@@ -184,10 +179,6 @@ PUNTOCOMA ";"
 
 %%
 
-//NOSE QUE ONDA
-// " "      ;  /*Ignorar espacios en blanco*/
-// "\t"     ;  /*Ignorar tabulaciones*/
-// "\n"     ;  /*Ignorar saltos de línea*/
 
 int main(int argc,char *argv[])
 {

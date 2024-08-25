@@ -32,10 +32,6 @@ int yylex();
 %token SI
 %token SINO
 %token MIENTRAS
-%token IN
-%token ENDWHILE
-%token BREAK
-%token CONTINUE
 %token LEER
 %token ESCRIBIR
 
@@ -72,57 +68,61 @@ int yylex();
 %token PUNTOCOMA
 
 
+
 %%
 programa:
     INT MAIN PA PC LLA instrucciones LLC {
         printf("Programa correcto\n");
-        //Aca guardo la tabla de simbolos
-    }
+        guardarTabla();
+		}
 
 instrucciones:
-    bloque_dec bloque | bloque
+    bloque_dec bloque | bloque {printf("Instrucciones correcto\n");}
 
 bloque_dec:
-    INIT LLA declaracion LLC
+    INIT LLA declaracion LLC {printf("Bloque_dec correcto\n");}
 
 declaracion:
-    ID, declaracion | ID : tipo PUNTOCOMA
+    ID, declaracion | ID : tipo PUNTOCOMA {
+		agregarATabla($1,tipo);
+
+		printf("Declaracion correcto\n");}
 
 tipo:
-    INT | FLOAT | CHAR | STRING
+    INT | FLOAT | CHAR | STRING {printf("Tipo correcto\n");}
 
 sentencia:
     asignacion PUNTO_COMA
 	| bloque_if
 	| bloque_while
 	| lectura PUNTO_COMA
-	| escritura PUNTO_COMA
+	| escritura PUNTO_COMA {printf("Sentencia correcto\n");}
 
 bloque:
-    bloque sentencia | sentencia
+    bloque sentencia | sentencia {printf("Bloque correcto\n");}
 
 // ASIGNACIONES
-asignacion:
-    ID OP_AS expresion //Aca chequear que la variable exista y que sea del tipo de la tabla
+asignacion: //Aca chequear que la variable exista y que sea del tipo de la tabla
+    ID OP_AS expresion {printf("Asignacion correcto\n");} 
 
 expresion:
-    expresion_string | expresion_aritmetica | expresion_id
+    expresion_string | expresion_aritmetica | expresion_id {printf("Expresion correcto\n");}
 
-expresion_string:
-    CONST_STRING
+expresion_string: 
+    CONST_STRING {printf("Expresion_string correcto\n");}
 
 expresion_id:
-    ID
+    ID {printf("Expresion_id correcto\n");}
 
-expresion_aritmetica:
+expresion_aritmetica: 
     termino 
     | expresion_aritmetica OP_SUM termino
-    | expresion_aritmetica OP_RES termino
+    | expresion_aritmetica OP_RES termino {printf("Expresion_aritmetica correcto\n");}
 
 termino:
     factor
     | termino OP_MUL factor
-    | termino OP_DIV factor
+    | termino OP_DIV factor {printf("Termino correcto\n");}	
 
 factor:
     ID
@@ -130,21 +130,21 @@ factor:
     | CONST_CHAR
     | CONST_STRING
     | CTE
-    | PA expresion_aritmetica PC
+    | PA expresion_aritmetica PC {printf("Factor correcto\n");}
 
 //BLOQUES ESPECIALES
 bloque_if:
     SI PA expresion_logica PC LLA instrucciones LLC
-    | SI PA expresion_logica PC LLA instrucciones LLC SINO LLA instrucciones LLC
+    | SI PA expresion_logica PC LLA instrucciones LLC SINO LLA instrucciones LLC {printf("Bloque_if correcto\n");}
 
 expresion_logica:
     termino_logico AND termino_logico
     | termino_logico OR termino_logico
     | NOT termino_logico
-    | termino_logico
+    | termino_logico {printf("Expresion_logica correcto\n");}
 
 termino_logico:
-    expresion_aritmetica comp_bool expresion_aritmetica
+    expresion_aritmetica comp_bool expresion_aritmetica {printf("Termino_logico correcto\n");}
 
 comp_bool:
     OP_COMP
@@ -152,20 +152,20 @@ comp_bool:
     | OP_MAYOR
     | OP_MENOR
     | OP_MAYORIG
-    | OP_MENORIG
+    | OP_MENORIG {printf("Comp_bool correcto\n");}
 
 bloque_while:
-    MIENTRAS PA expresion_logica PC LLA instrucciones LLC
+    MIENTRAS PA expresion_logica PC LLA instrucciones LLC {printf("Bloque_while correcto\n");}
 
 lectura:
-    LEER PA ID PC
+    LEER PA ID PC {printf("Lectura correcto\n");}
 
 escritura:
-    ESCRIBIR PA valor_escritura PC
+    ESCRIBIR PA valor_escritura PC {printf("Escritura correcto\n");}
 
 valor_escritura:
     ID
-    | CONST_STRING
+    | CONST_STRING {printf("Valor_escritura correcto\n");}
 
 %%
 
@@ -241,6 +241,7 @@ valor_escritura:
 // 	fclose(arch);
 // }
 
+<<<<<<< HEAD
 // /** Agrega una constante a la tabla de simbolos con el tipo ese*/
 // void agregarCteATabla(char* nombre,char* tipo){
 // 	if(fin_tabla >= TAMANIO_TABLA - 1){
@@ -276,6 +277,67 @@ valor_escritura:
 // 	}
 // 	//Si existe en la tabla, dejo que la compilacion siga
 // }
+=======
+/** Agrega una constante a la tabla de simbolos con el tipo ese*/
+void agregarATabla(char* nombre,char* tipo){
+	if(cantVarInsertadas >=TAMANIO_TABLA){
+		printf("Error: me quede sin espacio.\n");
+		system("Pause");
+		exit(2);
+	}
+
+	//Si no hay otra variable con el mismo nombre...
+	if(buscarEnTabla(nombre) == -1){
+		//Agregar nombre a tabla
+		cantVarInsertadas++;
+
+		//Agregar tipo de dato
+		strcpy(tabla[cantVarInsertadas].tipo,tipo);
+
+		//Agregar valor a la tabla
+		strcpy(tabla[cantVarInsertadas].nombre,nombre); 
+
+		//Agregar longitud
+		tabla[cantVarInsertadas].longitud = strlen(nombre); 
+	}
+	else{
+		printf("no se pueden ingresar variables con nombre repetido.\n");
+		system("Pause");
+		exit(2);
+	}
+}
+
+int buscarEnTabla(char* nombre){
+
+	for(i=0;i<cantVarInsertadas,i++){
+		for (int i = 0; i < tamaño; i++) {
+        if (strcmp(tabla[i].Nombre, nombre) == 0) {
+            return i; // Retorna el índice del nombre encontrado
+        }
+    }
+    return -1; // Retorna -1 si el nombre no se encuentra
+}
+>>>>>>> 655558420fd24341fddce5ad7f5b7682ea7cb219
+
+}
+
+void guardarTabla() {
+    FILE *archivo = fopen("symbol-table.txt", "wt");
+    if (archivo == NULL) {
+        printf("Error al abrir el archivo.\n");
+        exit(1);
+    }
+
+    for (int i = 0; i < cantVarInsertadas; i++) {
+        fprintf(archivo, "Nombre: %s, Tipo de dato: %s, Longitud: %d\n",
+                tabla[i].nombre, tabla[i].tipo, tabla[i].longitud);
+    }
+
+    fclose(archivo);
+    printf("Informacion guardada en el archivo symbol-table.txt .\n");
+}
+
+
 
 int main(int argc, char *argv[])
 {
