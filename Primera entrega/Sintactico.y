@@ -169,113 +169,113 @@ valor_escritura:
 
 %%
 
-/* Devuleve la posici�n en la que se encuentra el elemento buscado, -1 si no encontr� el elemento */
-int buscarEnTabla(char * name){
-   int i=0;
-   while(i<=fin_tabla){
-	   if(strcmp(tabla_simbolo[i].nombre,name) == 0){
-		   return i;
-	   }
-	   i++;
-   }
-   return -1;
-}
+// /* Devuleve la posici�n en la que se encuentra el elemento buscado, -1 si no encontr� el elemento */
+// int buscarEnTabla(char * name){
+//    int i=0;
+//    while(i<=fin_tabla){
+// 	   if(strcmp(tabla_simbolo[i].nombre,name) == 0){
+// 		   return i;
+// 	   }
+// 	   i++;
+//    }
+//    return -1;
+// }
 
 
-//Cuando se declara una variable inserto un campo en la tabla de simbolos
-void insertarVarATabla(char *nombre, int tipo){
-	if(fin_tabla >= TAMANIO_TABLA - 1){
-		printf("Error: me quede sin espacio en la tabla de simbolos. Sori, gordi.\n");
-		system("Pause");
-		exit(2);
-	}
-	//Si no hay otra variable con el mismo nombre...
-	if(buscarEnTabla(nombre) == -1){
-		//Agregar nombre a tabla
-		fin_tabla++;
-		escribirNombreEnTabla(nombre, fin_tabla);
+// //Cuando se declara una variable inserto un campo en la tabla de simbolos
+// void insertarVarATabla(char *nombre, int tipo){
+// 	if(fin_tabla >= TAMANIO_TABLA - 1){
+// 		printf("Error: me quede sin espacio en la tabla de simbolos. Sori, gordi.\n");
+// 		system("Pause");
+// 		exit(2);
+// 	}
+// 	//Si no hay otra variable con el mismo nombre...
+// 	if(buscarEnTabla(nombre) == -1){
+// 		//Agregar nombre a tabla
+// 		fin_tabla++;
+// 		escribirNombreEnTabla(nombre, fin_tabla);
 
-		//Agregar tipo de dato
-		tabla_simbolo[fin_tabla].tipo_dato = tipo;
-	}
-	else yyerror("Encontre dos declaraciones de variables con el mismo nombre. Decidite."); //Error, ya existe esa variable
-}
+// 		//Agregar tipo de dato
+// 		tabla_simbolo[fin_tabla].tipo_dato = tipo;
+// 	}
+// 	else yyerror("Encontre dos declaraciones de variables con el mismo nombre. Decidite."); //Error, ya existe esa variable
+// }
 
-/** Guarda la tabla de simbolos en un archivo de texto */
-void guardarTabla(){
-	if(fin_tabla == -1)
-		yyerror("No encontre la tabla de simbolos");
+// /** Guarda la tabla de simbolos en un archivo de texto */
+// void guardarTabla(){
+// 	if(fin_tabla == -1)
+// 		yyerror("No encontre la tabla de simbolos");
 
-	FILE* arch = fopen("ts.txt", "w+");
-	if(!arch){
-		printf("No pude crear el archivo ts.txt\n");
-		return;
-	}
+// 	FILE* arch = fopen("ts.txt", "w+");
+// 	if(!arch){
+// 		printf("No pude crear el archivo ts.txt\n");
+// 		return;
+// 	}
 
-	for(int i = 0; i <= fin_tabla; i++){
-		fprintf(arch, "%s\t", &(tabla_simbolo[i].nombre) );
+// 	for(int i = 0; i <= fin_tabla; i++){
+// 		fprintf(arch, "%s\t", &(tabla_simbolo[i].nombre) );
 
-		switch (tabla_simbolo[i].tipo_dato){
-		case Float:
-			fprintf(arch, "FLOAT");
-			break;
-		case Int:
-			fprintf(arch, "INT");
-			break;
-		case String:
-			fprintf(arch, "STRING");
-			break;
-		case CteFloat:
-			fprintf(arch, "CTE_FLOAT\t%f", tabla_simbolo[i].valor_f);
-			break;
-		case CteInt:
-			fprintf(arch, "CTE_INT\t%d", tabla_simbolo[i].valor_i);
-			break;
-		case CteString:
-			fprintf(arch, "CTE_STRING\t%s\t%d", &(tabla_simbolo[i].valor_s), tabla_simbolo[i].longitud);
-			break;
-		}
+// 		switch (tabla_simbolo[i].tipo_dato){
+// 		case Float:
+// 			fprintf(arch, "FLOAT");
+// 			break;
+// 		case Int:
+// 			fprintf(arch, "INT");
+// 			break;
+// 		case String:
+// 			fprintf(arch, "STRING");
+// 			break;
+// 		case CteFloat:
+// 			fprintf(arch, "CTE_FLOAT\t%f", tabla_simbolo[i].valor_f);
+// 			break;
+// 		case CteInt:
+// 			fprintf(arch, "CTE_INT\t%d", tabla_simbolo[i].valor_i);
+// 			break;
+// 		case CteString:
+// 			fprintf(arch, "CTE_STRING\t%s\t%d", &(tabla_simbolo[i].valor_s), tabla_simbolo[i].longitud);
+// 			break;
+// 		}
 
-		fprintf(arch, "\n");
-	}
-	fclose(arch);
-}
+// 		fprintf(arch, "\n");
+// 	}
+// 	fclose(arch);
+// }
 
-/** Agrega una constante a la tabla de simbolos con el tipo ese*/
-void agregarCteATabla(char* nombre,char* tipo){
-	if(fin_tabla >= TAMANIO_TABLA - 1){
-		printf("Error: me quede sin espacio en la tabla de simbolos. Sori, gordi.\n");
-		system("Pause");
-		exit(2);
-	}
+// /** Agrega una constante a la tabla de simbolos con el tipo ese*/
+// void agregarCteATabla(char* nombre,char* tipo){
+// 	if(fin_tabla >= TAMANIO_TABLA - 1){
+// 		printf("Error: me quede sin espacio en la tabla de simbolos. Sori, gordi.\n");
+// 		system("Pause");
+// 		exit(2);
+// 	}
 
-	//Si no hay otra variable con el mismo nombre...
-	if(buscarEnTabla(nombre) == -1){
-		//Agregar nombre a tabla
-		fin_tabla++;
-		escribirNombreEnTabla(nombre, fin_tabla);
+// 	//Si no hay otra variable con el mismo nombre...
+// 	if(buscarEnTabla(nombre) == -1){
+// 		//Agregar nombre a tabla
+// 		fin_tabla++;
+// 		escribirNombreEnTabla(nombre, fin_tabla);
 
-		//Agregar tipo de dato
-		tabla_simbolo[fin_tabla].tipo_dato = CteString;
+// 		//Agregar tipo de dato
+// 		tabla_simbolo[fin_tabla].tipo_dato = CteString;
 
-		//Agregar valor a la tabla
-		strcpy(tabla_simbolo[fin_tabla].valor_s, nombre+1); //nombre+1 es para no copiar el _ del principio
+// 		//Agregar valor a la tabla
+// 		strcpy(tabla_simbolo[fin_tabla].valor_s, nombre+1); //nombre+1 es para no copiar el _ del principio
 
-		//Agregar longitud
-		tabla_simbolo[fin_tabla].longitud = strlen(nombre) - 1;
-	}
-}
+// 		//Agregar longitud
+// 		tabla_simbolo[fin_tabla].longitud = strlen(nombre) - 1;
+// 	}
+// }
 
-/** Se fija si ya existe una entrada con ese nombre en la tabla de simbolos. Si no existe, muestra un error de variable sin declarar y aborta la compilacion. */
-void nombreRepetido(char* nombre){
-	//Si no existe en la tabla, error
-	if( buscarEnTabla(nombre) == -1){
-		char msg[100];
-		sprintf(msg,"%s? No, man, tenes que declarar las variables arriba. Esto no es un viva la pepa como java...", nombre);
-		yyerror(msg);
-	}
-	//Si existe en la tabla, dejo que la compilacion siga
-}
+// /** Se fija si ya existe una entrada con ese nombre en la tabla de simbolos. Si no existe, muestra un error de variable sin declarar y aborta la compilacion. */
+// void nombreRepetido(char* nombre){
+// 	//Si no existe en la tabla, error
+// 	if( buscarEnTabla(nombre) == -1){
+// 		char msg[100];
+// 		sprintf(msg,"%s? No, man, tenes que declarar las variables arriba. Esto no es un viva la pepa como java...", nombre);
+// 		yyerror(msg);
+// 	}
+// 	//Si existe en la tabla, dejo que la compilacion siga
+// }
 
 int main(int argc, char *argv[])
 {
