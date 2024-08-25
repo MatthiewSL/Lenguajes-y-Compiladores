@@ -17,7 +17,7 @@ CampoTablaSimbolos* tabla;
 int cantVarInsertadas=0;
 
 void guardarTabla();
-void agregarATabla(char* nombre,char* tipo);
+void agregarATabla(char* nombre);
 int buscarEnTabla(char * name);
 
 

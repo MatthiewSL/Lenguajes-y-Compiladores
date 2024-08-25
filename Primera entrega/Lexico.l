@@ -28,8 +28,6 @@ CONST_STRING "\""{LETRA}+|{CARACESP}+({LETRA}|{DIGITO})*{0,40}"\""
 ID	{LETRA}({LETRA}|{DIGITO})*
 COMENTARIO "*-"({LETRA}|{DIGITO})*"-*"
 
-
-// Operadores
 OP_AS ":="
 OP_COMP "=="
 OP_DIF "!="
@@ -48,7 +46,6 @@ OP_MUL "*"
 OP_RES "-"
 OP_DIV "/"
 
-// Bloques
 PA "("
 PC ")"
 CA "["
@@ -56,7 +53,6 @@ CC "]"
 LLA "{"
 LLC "}"
 
-// Palabras reservadas
 MIENTRAS "mientras"	        
 SI "si"			
 SINO "sino"   		
@@ -73,13 +69,11 @@ STRING "string"
 LEER "leer"
 ESCRIBIR "escribir"
 
-// Otros
 COMA ","
 PUNTOCOMA ";"
+DOSPUNTOS ":"
 
-/*podria hacerse mas corto haciendo "CTE" {return CTE;}*/
 %%
-// Constantes
 {CTE}	        { 
                 long value = atol(yytext); 
                 if (value < SHRT_MIN || value > SHRT_MAX) { 
@@ -115,8 +109,6 @@ PUNTOCOMA ";"
                 return CONST_CHAR; 
 }
 
-
-// Palabras reservadas
 {INIT}          {printf("\nInit: %s\n", yytext);return INIT;}
 {ID}	        {printf("\nIdentificador: %s\n", yytext);return ID;}
 {DEFINE}		{printf("\nDefine: %s\n", yytext);return DEFINE;}
@@ -131,14 +123,10 @@ PUNTOCOMA ";"
 {SI}			{printf("\nSi: %s\n", yytext);return SI;}
 {SINO}   		{printf("\nSino: %s\n", yytext);return SINO;}
 {MIENTRAS}	    {printf("\nMientras: %s\n", yytext);return MIENTRAS;}
-{IN}	        {printf("\nIn: %s\n", yytext);return IN;}
-{ENDWHILE}		{printf("\nEndwhile: %s\n", yytext);return ENDWHILE;}
-{BREAK}			{printf("\nBreak: %s\n", yytext);return BREAK;}
-{CONTINUE}		{printf("\nContinue: %s\n", yytext);return CONTINUE;}
 {LEER}	        {printf("\nLeer: %s\n", yytext);return LEER;}
 {ESCRIBIR}	    {printf("\nEscribir: %s\n", yytext);return ESCRIBIR;}
 
-// Operadores
+
 {OP_AS}	        {printf("\nAsignacion: %s\n", yytext);return OP_AS;}
 {OP_COMP}       {printf("\nComparacion: %s\n", yytext);return OP_COMP;}
 {OP_DIF}        {printf("\nDiferenteDe: %s\n", yytext);return OP_DIF;}
@@ -157,7 +145,7 @@ PUNTOCOMA ";"
 {OP_RES}        {printf("\nResta: %s\n", yytext);return OP_RES;}
 {OP_DIV}        {printf("\nDivision: %s\n", yytext);return OP_DIV;}
 
-// Bloques
+
 {PA}	        {printf("\nParAbre: %s\n", yytext);return PA;}
 {PC}	        {printf("\nParCierra: %s\n", yytext);return PC;}
 {LLA}	        {printf("\nLlaveAbre: %s\n", yytext);return LLA;}
@@ -165,12 +153,13 @@ PUNTOCOMA ";"
 {CA}	        {printf("\nCorcheteAbre: %s\n", yytext);return CA;}
 {CC}	        {printf("\nCorcheteCierra: %s\n", yytext);return CC;}
 
-// Otros
+
 {COMA}	        {printf("\nComa: %s\n", yytext);return COMA;}
 {PUNTOCOMA}	    {printf("\nPuntoComa: %s\n", yytext);return PUNTOCOMA;}
 {COMENTARIO}	{printf("\nComentario: %s\n", yytext);}
+{DOSPUNTOS}     {printf("\nDos Puntos: %s\n", yytext);return DOSPUNTOS;}
 
-// Espacios y errores
+
 " "             { printf("Espacio en blanco encontrado\n"); }
 "\t"            { printf("Tabulador encontrado\n"); }
 "\n"            { printf("Salto de linea encontrado\n"); }
