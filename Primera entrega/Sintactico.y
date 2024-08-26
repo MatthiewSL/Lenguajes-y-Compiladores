@@ -16,14 +16,21 @@ int yystopparser=0;
 FILE  *yyin;
 int yyerror();
 int yylex();
-int tipoVariable;
+char* tipoVariable;
 %}
 
+%union {
+    int intval;
+    float floatval;
+    char charval;
+    char *strval;
+}
+
 //Constantes
-%token CTE
-%token CONST_REAL
-%token CONST_STRING
-%token CONST_CHAR
+%token <intval> CTE
+%token <floatval> CONST_REAL
+%token <strval> CONST_STRING
+%token <charval> CONST_CHAR
 
 //Palabras reservadas
 %token INIT
@@ -70,7 +77,7 @@ int tipoVariable;
 %token PC
 
 //Otros
-%token ID
+%token <strval> ID
 %token COMA
 %token PUNTOCOMA
 %token DOSPUNTOS
@@ -79,10 +86,11 @@ int tipoVariable;
 
 %%
 programa:
-    INT MAIN PA PC LLA instrucciones LLC {
+    INT MAIN PA PC LLA instrucciones LLC 
+    {
         printf("Programa correcto\n");
         guardarTabla();
-		}
+	}
 
 instrucciones:
     bloque_dec bloque | bloque {printf("Instrucciones correcto\n");}
@@ -92,26 +100,26 @@ bloque_dec:
 
 declaracion:
     ID COMA declaracion | ID DOSPUNTOS tipo PUNTOCOMA {
-		agregarATabla(yylval.string_val);
+		agregarATabla($1);
 		printf("Declaracion correcto\n");
     }
 
 tipo:
     INT     {
                 printf("Tipo int correcto\n");
-                tipoVariable = INT;
+                tipoVariable = Int;
             } 
     | FLOAT  {
                 printf("Tipo float correcto\n");
-                tipoVariable = FLOAT;
+                tipoVariable = Float;
              }
     | CHAR   {
                 printf("Tipo char correcto\n");
-                tipoVariable = CHAR;
+                tipoVariable = Char;
              }
     | STRING {
                 printf("Tipo string correcto\n");
-                tipoVariable = STRING;
+                tipoVariable = String;
              }
 
 sentencia:
@@ -187,6 +195,7 @@ valor_escritura:
 
 /** Agrega una constante a la tabla de simbolos con el tipo ese*/
 void agregarATabla(char* nombre){
+    printf("Agregando a tabla: %s\n", nombre);
 	if(cantVarInsertadas >=TAMANIO_TABLA){
 		printf("Error: sin espacio en la tabla de simbolos.\n");
 		system("Pause");
@@ -199,6 +208,7 @@ void agregarATabla(char* nombre){
 		cantVarInsertadas++;
 
 		//Agregar tipo de dato
+        printf("Insertado en tabla: %s\n", tipoVariable);
 		strcpy(tabla[cantVarInsertadas].tipo,tipoVariable);
 
 		//Agregar valor a la tabla
@@ -222,6 +232,7 @@ int buscarEnTabla(char* nombre){
         }
         return -1;
     }
+    return -1;
 }
 
 void guardarTabla() {
@@ -232,7 +243,6 @@ void guardarTabla() {
         exit(1);
     }
 
-
     for (i = 0; i < cantVarInsertadas; i++) {
         fprintf(archivo, "Nombre: %s, Tipo de dato: %s, Longitud: %d\n",
                 tabla[i].nombre, tabla[i].tipo, tabla[i].longitud);
@@ -242,26 +252,20 @@ void guardarTabla() {
     printf("Informacion guardada en el archivo symbol-table.txt .\n");
 }
 
-
-
-int main(int argc, char *argv[])
-{
-    if((yyin = fopen(argv[1], "rt"))==NULL)
-    {
+int main(int argc, char *argv[]){
+    if((yyin = fopen(argv[1], "rt"))==NULL){
         printf("\nNo se puede abrir el archivo de prueba: %s\n", argv[1]);
-       
-    }
-    else
-    { 
-        
+    }else{ 
         yyparse();
-        
     }
+
 	fclose(yyin);
-        return 0;
+    return 0;
 }
-int yyerror(void)
-     {
-       printf("Error Sintactico\n");
-	 exit (1);
-     }
+
+int yyerror(char* mensaje)
+ {
+	printf("Error en: %s\n", mensaje);
+	system ("Pause");
+	exit (1);
+ }

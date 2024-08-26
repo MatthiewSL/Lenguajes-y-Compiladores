@@ -21,4 +21,4 @@ void agregarATabla(char* nombre);
 int buscarEnTabla(char * name);
 
 
-#endif // INCLUDE_TABLA_H_
+#endif // INCLUDE_TABLA_H

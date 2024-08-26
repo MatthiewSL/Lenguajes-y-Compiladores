@@ -6,9 +6,7 @@
 #include <string.h>
 #include "y.tab.h"
 FILE *yyin;
-int yylval;
 char *yyltext;
-
 
 int yyerror(void);
 
@@ -25,7 +23,7 @@ CTE {DIGITO}+
 CONST_REAL {DIGITO}+"."{DIGITO}+|{DIGITO}+"."{DIGITO}*|{DIGITO}*"."{DIGITO}+
 CONST_CHAR "'"{LETRA}"'"
 CONST_STRING "\""{LETRA}+|{CARACESP}+({LETRA}|{DIGITO})*{0,40}"\""
-ID	{LETRA}({LETRA}|{DIGITO})*
+ID {LETRA}({LETRA}|{DIGITO})*
 COMENTARIO "*-"({LETRA}|{DIGITO})*"-*"
 
 OP_AS ":="
@@ -53,19 +51,19 @@ CC "]"
 LLA "{"
 LLC "}"
 
-MIENTRAS "mientras"	        
-SI "si"			
-SINO "sino"   		
+MIENTRAS "mientras"
+SI "si"
+SINO "sino"
 INIT "init"
-DEFINE "define"		
-INCLUDE "include"		
-MAIN "main"			
-RETURN "return"		
-VOID "void"			
-FLOAT "float"			
-CHAR "char"			
-INT "int"			
-STRING "string"					
+DEFINE "define"
+INCLUDE "include"
+MAIN "main"
+RETURN "return"
+VOID "void"
+FLOAT "float"
+CHAR "char"
+INT "int"
+STRING "string"
 LEER "leer"
 ESCRIBIR "escribir"
 
@@ -110,7 +108,6 @@ DOSPUNTOS ":"
 }
 
 {INIT}          {printf("\nInit: %s\n", yytext);return INIT;}
-{ID}	        {printf("\nIdentificador: %s\n", yytext);return ID;}
 {DEFINE}		{printf("\nDefine: %s\n", yytext);return DEFINE;}
 {INCLUDE}		{printf("\nInclude: %s\n", yytext);return INCLUDE;}
 {MAIN}			{printf("\nMain: %s\n", yytext);return MAIN;}
@@ -125,6 +122,11 @@ DOSPUNTOS ":"
 {MIENTRAS}	    {printf("\nMientras: %s\n", yytext);return MIENTRAS;}
 {LEER}	        {printf("\nLeer: %s\n", yytext);return LEER;}
 {ESCRIBIR}	    {printf("\nEscribir: %s\n", yytext);return ESCRIBIR;}
+{ID}	        {
+                    printf("\nIdentificador: %s\n", yytext);
+                    yylval.strval = strdup(yytext);
+                    return ID; 
+                }
 
 
 {OP_AS}	        {printf("\nAsignacion: %s\n", yytext);return OP_AS;}
@@ -159,29 +161,30 @@ DOSPUNTOS ":"
 {COMENTARIO}	{printf("\nComentario: %s\n", yytext);}
 {DOSPUNTOS}     {printf("\nDos Puntos: %s\n", yytext);return DOSPUNTOS;}
 
-
-" "             { printf("Espacio en blanco encontrado\n"); }
-"\t"            { printf("Tabulador encontrado\n"); }
-"\n"            { printf("Salto de linea encontrado\n"); }
+"\n"      		
+"\t"
+"\n\t"
+" "             		
+"\r\n"
 .			     { printf("ERROR LEXICO: Caracter no reconocido: %s\n", yytext); exit(0);}
 
 
 %%
 
 
-int main(int argc,char *argv[])
-{
-if ((yyin = fopen(argv[1], "rt")) == NULL)
-{
-printf("\nNo se puede abrir el archivo: %s\n", argv[1]);
-}
-else
-{
-yylex();
-}
-fclose(yyin);
-return 0;
-}
+// int main(int argc,char *argv[])
+// {
+// if ((yyin = fopen(argv[1], "rt")) == NULL)
+// {
+// printf("\nNo se puede abrir el archivo: %s\n", argv[1]);
+// }
+// else
+// {
+// yylex();
+// }
+// fclose(yyin);
+// return 0;
+// }
 
 
 
