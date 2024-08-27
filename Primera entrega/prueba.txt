@@ -1,13 +1,6 @@
-<<<<<<< HEAD
 int main(){
  init{
     a : float;
  }
-c:=d*(e-21)/4;
-=======
-int main(){
- init{
-    a : float;
- }
->>>>>>> d5ece5ad09c6c415d2e8f1bd04fc5beb26e72680
+c:=d*(e-21)/4
 }

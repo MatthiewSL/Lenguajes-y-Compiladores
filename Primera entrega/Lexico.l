@@ -18,13 +18,14 @@ int yyerror(void);
 DIGITO	[0-9]
 LETRA   [a-zA-Z]
 CARACESP [@|#|$|%|&|_]
+ESPACIO " "
 
 CTE {DIGITO}+
 CONST_REAL {DIGITO}+"."{DIGITO}+|{DIGITO}+"."{DIGITO}*|{DIGITO}*"."{DIGITO}+
 CONST_CHAR "'"{LETRA}"'"
 CONST_STRING "\""{LETRA}+|{CARACESP}+({LETRA}|{DIGITO})*{0,40}"\""
 ID {LETRA}({LETRA}|{DIGITO})*
-COMENTARIO "*-"({LETRA}|{DIGITO})*"-*"
+COMENTARIO "*-"({LETRA}|{DIGITO}|{ESPACIO})*"-*"
 
 OP_AS ":="
 OP_COMP "=="
@@ -72,6 +73,7 @@ PUNTOCOMA ";"
 DOSPUNTOS ":"
 
 %%
+{COMENTARIO}	{printf("\nComentario: %s\n", yytext);}
 {CTE}	        { 
                 long value = atol(yytext); 
                 if (value < SHRT_MIN || value > SHRT_MAX) { 
@@ -158,7 +160,6 @@ DOSPUNTOS ":"
 
 {COMA}	        {printf("\nComa: %s\n", yytext);return COMA;}
 {PUNTOCOMA}	    {printf("\nPuntoComa: %s\n", yytext);return PUNTOCOMA;}
-{COMENTARIO}	{printf("\nComentario: %s\n", yytext);}
 {DOSPUNTOS}     {printf("\nDos Puntos: %s\n", yytext);return DOSPUNTOS;}
 
 "\n"      		
@@ -167,7 +168,6 @@ DOSPUNTOS ":"
 " "             		
 "\r\n"
 .			     { printf("ERROR LEXICO: Caracter no reconocido: %s\n", yytext); exit(0);}
-
 
 %%
 
