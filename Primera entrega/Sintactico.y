@@ -91,7 +91,7 @@ programa:
 	}
 
 instrucciones:
-    bloque_dec bloque | bloque {printf("Instrucciones correcto\n");}
+    bloque_dec bloque | bloque_dec | bloque {printf("Instrucciones correcto\n");}
 
 bloque_dec:
     INIT LLA declaracion LLC {printf("Bloque_dec correcto\n");}
