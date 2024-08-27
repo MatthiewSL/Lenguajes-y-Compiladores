@@ -204,9 +204,6 @@ void agregarATabla(char* nombre){
 
 	//Si no hay otra variable con el mismo nombre...
 	if(buscarEnTabla(nombre) == -1){
-		//Agregar nombre a tabla
-		cantVarInsertadas++;
-
 		//Agregar tipo de dato
         printf("Insertado en tabla: %s\n", tipoVariable);
 		strcpy(tabla[cantVarInsertadas].tipo,tipoVariable);
@@ -216,6 +213,8 @@ void agregarATabla(char* nombre){
 
 		//Agregar longitud
 		tabla[cantVarInsertadas].longitud = strlen(nombre); 
+		//Agregar nombre a tabla
+		cantVarInsertadas++;
 	}
 	else{
 		printf("No se pueden ingresar variables con nombre repetido.\n");

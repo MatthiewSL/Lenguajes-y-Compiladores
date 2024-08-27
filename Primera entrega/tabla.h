@@ -8,12 +8,12 @@
 #define TAMANIO_TABLA 300
 
 typedef struct  {
-    char* nombre;
-    char* tipo;
+    char nombre[30];
+    char tipo[15];
     int longitud;
 }CampoTablaSimbolos;
 
-CampoTablaSimbolos* tabla;
+CampoTablaSimbolos tabla[TAMANIO_TABLA];
 int cantVarInsertadas=0;
 
 void guardarTabla();

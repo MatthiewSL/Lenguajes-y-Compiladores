@@ -1,0 +1,1 @@
+Nombre: a, Tipo de dato: float, Longitud: 1
