@@ -1,6 +1,3 @@
 int main(){
- init{
-    a : float;
- }
 c:=d*(e-21)/4;
 }
