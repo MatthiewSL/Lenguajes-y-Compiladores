@@ -36,20 +36,20 @@ char* tipoVariable;
 %token INIT
 %token DEFINE
 %token INCLUDE
-%token INT
 %token MAIN
 %token RETURN
 %token VOID
 %token CHAR
+%token INT
 %token FLOAT
 %token STRING
 %token SI
 %token SINO
 %token MIENTRAS
 %token LEER
-%token ESCRIBIR
 %token TRIANGULO
 %token SUMALOSULTIMOS
+%token ESCRIBIR
 
 //Operadores
 %right OP_AS
@@ -88,7 +88,10 @@ programa:
     {
         printf("Programa correcto\n");
         guardarTabla();
-	} 
+	}
+
+instrucciones:
+    bloque {printf("Instrucciones correcto\n");}
 
 bloque_dec:
     INIT LLA declaracion LLC {printf("Bloque_dec correcto\n");}
@@ -117,23 +120,13 @@ tipo:
                 tipoVariable = String;
              }
 
-instrucciones:
-    bloque {printf("Instrucciones correcto\n");}
-
-bloque:
-    sentencia bloque | sentencia {printf("Bloque correcto\n");}
-
 sentencia:
-    asignacion PUNTOCOMA 
-    | funcion PUNTOCOMA
+    asignacion PUNTOCOMA
 	| bloque_if
+    | funcion PUNTOCOMA
 	| bloque_while
 	| lectura PUNTOCOMA
 	| escritura PUNTOCOMA {printf("Sentencia correcto\n");}
-
-// ASIGNACIONES
-asignacion: //Aca chequear que la variable exista y que sea del tipo de la tabla
-    ID OP_AS expresion { buscarEnTabla((char*)$1) == -1 ? yyerror("Variable no declarada") : printf("Asignacion correcto\n");} 
 
 funcion:
     TRIANGULO PA expresion_aritmetica COMA expresion_aritmetica COMA expresion_aritmetica PC {printf("Funcion correcto\n");}
@@ -142,6 +135,13 @@ funcion:
 lista_numeros:
     CTE COMA lista_numeros
     | CTE {printf("Lista_numeros correcto\n");}
+
+bloque:
+    sentencia bloque | sentencia {printf("Bloque correcto\n");}
+
+// ASIGNACIONES
+asignacion: //Aca chequear que la variable exista y que sea del tipo de la tabla
+    ID OP_AS expresion {buscarEnTabla($1) != -1 ? printf("Asignacion correcto\n") : printf("Variable no declarada\n");} 
 
 expresion:
     expresion_aritmetica {printf("Expresion correcto\n");}
@@ -157,11 +157,11 @@ termino:
     | termino OP_DIV factor {printf("Termino correcto\n");}
 
 factor:
-    ID {buscarEnTabla((char*)$1) == -1 ? yyerror("Variable no declarada") : printf("Factor correcto\n");}
-    | CONST_REAL {printf("Factor correcto\n");}
-    | CONST_CHAR {printf("Factor correcto\n");}
-    | CONST_STRING {printf("Factor correcto\n");}
-    | CTE {printf("Factor correcto\n");}
+    ID {buscarEnTabla($1) != -1 ? printf("Factor correcto\n") : printf("Variable no declarada\n");} 
+    | CONST_REAL
+    | CONST_CHAR
+    | CONST_STRING
+    | CTE
     | PA expresion_aritmetica PC {printf("Factor correcto\n");}
 
 //BLOQUES ESPECIALES
@@ -190,13 +190,13 @@ bloque_while:
     MIENTRAS PA expresion_logica PC LLA instrucciones LLC {printf("Bloque_while correcto\n");}
 
 lectura:
-    LEER PA ID PC {buscarEnTabla($3) == -1 ? yyerror("Variable no declarada") : printf("Lectura correcto\n");}
+    LEER PA ID PC { buscarEnTabla($3) != -1 ? printf("Lectura correcto\n") : printf("Variable no declarada\n");}
 
 escritura:
-    ESCRIBIR PA valor_escritura PC {printf("Escritura correcto\n");}
+    ESCRIBIR PA valor_escritura PC { printf("Escritura correcto\n");}
 
 valor_escritura:
-    ID {buscarEnTabla((char*)$1) == -1 ? yyerror("Variable no declarada") : printf("Valor_escritura correcto\n");}
+    ID {buscarEnTabla($1) != -1 ? printf("Valor_escritura correcto\n") : printf("Variable no declarada\n");}
     | CONST_STRING {printf("Valor_escritura correcto\n");}
 %%
 

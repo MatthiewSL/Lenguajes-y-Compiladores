@@ -78,7 +78,7 @@ DOSPUNTOS ":"
 {COMENTARIO}	{printf("\nComentario: %s\n", yytext);}
 {CTE}	        { 
                 long value = atol(yytext); 
-                if (value < 0 || value > SHRT_MAX) { 
+                if (value < SHRT_MIN || value > SHRT_MAX) { 
                     printf("ERROR: Constante entera fuera del rango de 16 bits: %s\n", yytext); 
                     exit(1); 
                 } 
@@ -111,22 +111,22 @@ DOSPUNTOS ":"
                 return CONST_CHAR; 
 }
 
-{INIT}          {printf("\nInit: %s\n", yytext);return INIT;}
-{DEFINE}		{printf("\nDefine: %s\n", yytext);return DEFINE;}
-{INCLUDE}		{printf("\nInclude: %s\n", yytext);return INCLUDE;}
-{MAIN}			{printf("\nMain: %s\n", yytext);return MAIN;}
-{RETURN}		{printf("\nReturn: %s\n", yytext);return RETURN;}
-{VOID}			{printf("\nVoid: %s\n", yytext);return VOID;}
-{CHAR}			{printf("\nChar: %s\n", yytext);return CHAR;}
-{FLOAT}			{printf("\nFloat: %s\n", yytext);return FLOAT;}
-{INT}			{printf("\nInt: %s\n", yytext);return INT;}
-{STRING}		{printf("\nString: %s\n", yytext);return STRING;}
-{SI}			{printf("\nSi: %s\n", yytext);return SI;}
-{SINO}   		{printf("\nSino: %s\n", yytext);return SINO;}
-{MIENTRAS}	    {printf("\nMientras: %s\n", yytext);return MIENTRAS;}
-{LEER}	        {printf("\nLeer: %s\n", yytext);return LEER;}
-{ESCRIBIR}	    {printf("\nEscribir: %s\n", yytext);return ESCRIBIR;}
-{TRIANGULO}     {printf("\nTriangulo: %s\n", yytext);return TRIANGULO;}
+{INIT}               {printf("\nInit: %s\n", yytext);return INIT;}
+{DEFINE}		     {printf("\nDefine: %s\n", yytext);return DEFINE;}
+{INCLUDE}		     {printf("\nInclude: %s\n", yytext);return INCLUDE;}
+{MAIN}			     {printf("\nMain: %s\n", yytext);return MAIN;}
+{RETURN}		     {printf("\nReturn: %s\n", yytext);return RETURN;}
+{VOID}			     {printf("\nVoid: %s\n", yytext);return VOID;}
+{CHAR}			     {printf("\nChar: %s\n", yytext);return CHAR;}
+{FLOAT}			     {printf("\nFloat: %s\n", yytext);return FLOAT;}
+{INT}			     {printf("\nInt: %s\n", yytext);return INT;}
+{STRING}		     {printf("\nString: %s\n", yytext);return STRING;}
+{SI}			     {printf("\nSi: %s\n", yytext);return SI;}
+{SINO}   		     {printf("\nSino: %s\n", yytext);return SINO;}
+{MIENTRAS}	         {printf("\nMientras: %s\n", yytext);return MIENTRAS;}
+{LEER}	             {printf("\nLeer: %s\n", yytext);return LEER;}
+{ESCRIBIR}	         {printf("\nEscribir: %s\n", yytext);return ESCRIBIR;}
+{TRIANGULO}          {printf("\nTriangulo: %s\n", yytext);return TRIANGULO;}
 {SUMALOSULTIMOS}     {printf("\nSumaLosUltimos: %s\n", yytext);return SUMALOSULTIMOS;}
 {ID}	        {
                     printf("\nIdentificador: %s\n", yytext);
