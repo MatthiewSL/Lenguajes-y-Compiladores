@@ -1,1 +1,3 @@
 Nombre: a, Tipo de dato: float, Longitud: 1
+Nombre: b, Tipo de dato: string, Longitud: 1
+Nombre: c, Tipo de dato: int, Longitud: 1

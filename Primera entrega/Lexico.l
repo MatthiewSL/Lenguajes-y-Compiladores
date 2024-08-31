@@ -23,7 +23,7 @@ ESPACIO " "
 CTE {DIGITO}+
 CONST_REAL {DIGITO}+"."{DIGITO}+|{DIGITO}+"."{DIGITO}*|{DIGITO}*"."{DIGITO}+
 CONST_CHAR "'"{LETRA}"'"
-CONST_STRING "\""{LETRA}+|{CARACESP}+({LETRA}|{DIGITO})*{0,40}"\""
+CONST_STRING \"([^\"\\\\]|\\\\.)*\"
 ID {LETRA}({LETRA}|{DIGITO})*
 COMENTARIO "*-"({LETRA}|{DIGITO}|{ESPACIO})*"-*"
 
@@ -70,6 +70,7 @@ ESCRIBIR "escribir"
 TRIANGULO "triangulo"
 SUMALOSULTIMOS "sumaLosUltimos"
 
+
 COMA ","
 PUNTOCOMA ";"
 DOSPUNTOS ":"
@@ -111,23 +112,23 @@ DOSPUNTOS ":"
                 return CONST_CHAR; 
 }
 
-{INIT}               {printf("\nInit: %s\n", yytext);return INIT;}
-{DEFINE}		     {printf("\nDefine: %s\n", yytext);return DEFINE;}
-{INCLUDE}		     {printf("\nInclude: %s\n", yytext);return INCLUDE;}
-{MAIN}			     {printf("\nMain: %s\n", yytext);return MAIN;}
-{RETURN}		     {printf("\nReturn: %s\n", yytext);return RETURN;}
-{VOID}			     {printf("\nVoid: %s\n", yytext);return VOID;}
-{CHAR}			     {printf("\nChar: %s\n", yytext);return CHAR;}
-{FLOAT}			     {printf("\nFloat: %s\n", yytext);return FLOAT;}
-{INT}			     {printf("\nInt: %s\n", yytext);return INT;}
-{STRING}		     {printf("\nString: %s\n", yytext);return STRING;}
-{SI}			     {printf("\nSi: %s\n", yytext);return SI;}
-{SINO}   		     {printf("\nSino: %s\n", yytext);return SINO;}
-{MIENTRAS}	         {printf("\nMientras: %s\n", yytext);return MIENTRAS;}
-{LEER}	             {printf("\nLeer: %s\n", yytext);return LEER;}
-{ESCRIBIR}	         {printf("\nEscribir: %s\n", yytext);return ESCRIBIR;}
-{TRIANGULO}          {printf("\nTriangulo: %s\n", yytext);return TRIANGULO;}
-{SUMALOSULTIMOS}     {printf("\nSumaLosUltimos: %s\n", yytext);return SUMALOSULTIMOS;}
+{INIT}          {printf("\nInit: %s\n", yytext);return INIT;}
+{DEFINE}		{printf("\nDefine: %s\n", yytext);return DEFINE;}
+{INCLUDE}		{printf("\nInclude: %s\n", yytext);return INCLUDE;}
+{MAIN}			{printf("\nMain: %s\n", yytext);return MAIN;}
+{RETURN}		{printf("\nReturn: %s\n", yytext);return RETURN;}
+{VOID}			{printf("\nVoid: %s\n", yytext);return VOID;}
+{CHAR}			{printf("\nChar: %s\n", yytext);return CHAR;}
+{FLOAT}			{printf("\nFloat: %s\n", yytext);return FLOAT;}
+{INT}			{printf("\nInt: %s\n", yytext);return INT;}
+{STRING}		{printf("\nString: %s\n", yytext);return STRING;}
+{SI}			{printf("\nSi: %s\n", yytext);return SI;}
+{SINO}   		{printf("\nSino: %s\n", yytext);return SINO;}
+{MIENTRAS}	    {printf("\nMientras: %s\n", yytext);return MIENTRAS;}
+{LEER}	        {printf("\nLeer: %s\n", yytext);return LEER;}
+{ESCRIBIR}	    {printf("\nEscribir: %s\n", yytext);return ESCRIBIR;}
+{TRIANGULO}	    {printf("\nTriangulo: %s\n", yytext);return TRIANGULO;}
+{SUMALOSULTIMOS}	{printf("\nSumaLosUltimos: %s\n", yytext);return SUMALOSULTIMOS;}
 {ID}	        {
                     printf("\nIdentificador: %s\n", yytext);
                     yylval.strval = strdup(yytext);
@@ -166,11 +167,11 @@ DOSPUNTOS ":"
 {PUNTOCOMA}	    {printf("\nPuntoComa: %s\n", yytext);return PUNTOCOMA;}
 {DOSPUNTOS}     {printf("\nDos Puntos: %s\n", yytext);return DOSPUNTOS;}
 
-"\n"      		{printf("\n");return 0;}
-"\t"            {printf("\t");return 0;}
-"\n\t"          {printf("\n\t");return 0;}
-" "             {printf(" ");return 0;}   	
-"\r\n"          {printf("\r\n");return 0;}
+"\n"      		
+"\t"
+"\n\t"
+" "             		
+"\r\n"
 .			     { printf("ERROR LEXICO: Caracter no reconocido: %s\n", yytext); exit(0);}
 
 %%
@@ -189,6 +190,3 @@ DOSPUNTOS ":"
 // fclose(yyin);
 // return 0;
 // }
-
-
-
