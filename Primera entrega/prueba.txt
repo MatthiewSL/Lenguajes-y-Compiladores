@@ -2,5 +2,5 @@ int main(){
  init{
     a : float;
  }
-c:=d*(e-21)/4
+c:=d*(e-21)/4;
 }
