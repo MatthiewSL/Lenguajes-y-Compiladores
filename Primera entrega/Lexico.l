@@ -22,8 +22,13 @@ ESPACIO " "
 
 COMENTARIO \*-[^\n]*-\*
 CTE {DIGITO}+
+<<<<<<< HEAD
 CONST_REAL {DIGITO}+"."{DIGITO}+|{DIGITO}+"."{DIGITO}*|{DIGITO}*"."{DIGITO}+
 CONST_STRING \"([^\"\\\\]|\\\\.)*\"
+=======
+CONST_REAL {DIGITO}+"."{DIGITO}+
+CONST_STRING "\""{LETRA}+|{CARACESP}+({LETRA}|{DIGITO})*{0,40}"\""
+>>>>>>> 04ea6637272c09a9fcbcc3395790f26820f48fc5
 ID {LETRA}({LETRA}|{DIGITO})*
 
 OP_AS ":="
@@ -62,6 +67,11 @@ ESCRIBIR "escribir"
 TRIANGULO "triangulo"
 SUMALOSULTIMOS "sumaLosUltimos"
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 04ea6637272c09a9fcbcc3395790f26820f48fc5
 COMA ","
 PUNTOCOMA ";"
 DOSPUNTOS ":"
@@ -79,7 +89,7 @@ DOSPUNTOS ":"
 }
 {CONST_REAL}    {
                 float valor = atof(yytext);
-                if (valor < -FLT_MAX || valor > FLT_MAX) {
+                if (valor < 0 || valor > FLT_MAX) {
                     printf("ERROR LEXICO: Constante real fuera de rango: %s\n", yytext);
                     exit(0);
                 }
@@ -106,6 +116,8 @@ DOSPUNTOS ":"
 {MIENTRAS}	    {printf("\nMientras: %s\n", yytext);return MIENTRAS;}
 {LEER}	        {printf("\nLeer: %s\n", yytext);return LEER;}
 {ESCRIBIR}	    {printf("\nEscribir: %s\n", yytext);return ESCRIBIR;}
+{TRIANGULO}	    {printf("\nTriangulo: %s\n", yytext);return TRIANGULO;}
+{SUMALOSULTIMOS}	{printf("\nSumaLosUltimos: %s\n", yytext);return SUMALOSULTIMOS;}
 {TRIANGULO}	    {printf("\nTriangulo: %s\n", yytext);return TRIANGULO;}
 {SUMALOSULTIMOS}	{printf("\nSumaLosUltimos: %s\n", yytext);return SUMALOSULTIMOS;}
 {ID}	        {
@@ -143,6 +155,11 @@ DOSPUNTOS ":"
 {PUNTOCOMA}	    {printf("\nPuntoComa: %s\n", yytext);return PUNTOCOMA;}
 {DOSPUNTOS}     {printf("\nDos Puntos: %s\n", yytext);return DOSPUNTOS;}
 
+"\n"      		
+"\t"
+"\n\t"
+" "             		
+"\r\n"
 "\n"      		
 "\t"
 "\n\t"
