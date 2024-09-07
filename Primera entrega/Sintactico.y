@@ -31,12 +31,9 @@ char* tipoVariable;
 
 //Palabras reservadas
 %token INIT
-%token DEFINE
-%token INCLUDE
 %token INT
 %token MAIN
 %token RETURN
-%token VOID
 %token INT
 %token FLOAT
 %token STRING
@@ -54,14 +51,9 @@ char* tipoVariable;
 %token OP_DIF
 %token OP_MAYOR
 %token OP_MENOR
-%token OP_MAYORIG
-%token OP_MENORIG
 %token OP_AND
 %token OP_OR
 %token OP_NOT
-%token OP_MOD
-%token OP_INC
-%token OP_DEC
 %left OP_SUM OP_RES
 %left OP_MUL OP_DIV
 
