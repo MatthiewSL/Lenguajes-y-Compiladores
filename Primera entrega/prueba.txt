@@ -1,5 +1,59 @@
 int main() {
     init {
+        a : float;
         b, e : int;
+        d : string;
+        w : int;
+        *- escribir "Ingrese un numero"; -*
+        *- en el init solo puedo tener declaraciones de variables -*
     }
+
+    a := 43.2;
+    e := 7;
+    b := 5;
+    d := "string";
+    *- b = "hola"-*
+    *-no se puede asignar un string a una variable de enteros-*
+
+    si (b > e) {
+        escribir("b es más grande que e");
+        leer(w);
+    } sino {
+        escribir("b es más chico o igual a e");
+    }
+
+    mientras (b > e) {
+        si (b > e) {
+            escribir("b es más grande que e");
+        } sino {
+            escribir("b es más chico o igual a e");
+        }
+    }
+
+    triangulo(b+2,e/4,w);
+    sumalosultimos(4;[2,3,4,5,6,7,8,9,10]);
+
+    si (a > b AND c > b)
+{
+    escribir("a es mas grande que b y c es mas grande que b")
+}
+
+si (a > b OR c > b)
+{
+    escribir("a es mas grande que b y c es mas grande que b")
+}
+
+si (NOT c > b)
+{
+    escribir("a es mas grande que b y c es mas grande que b")
+}
+ *-si (mientras())-*
+ *-no puedo tener un mientras dentro de un si-*
+ *-si ((int1 > int2) {-*
+ *-no puedo tener 2 parentesis de un lado y uno del otro-*
+ *-leer()-*
+ *-leer debe terminar con ;-*
+   
+
+
 }

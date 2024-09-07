@@ -34,8 +34,6 @@ OP_MENOR "<"
 OP_AND "AND"
 OP_OR "OR"
 OP_NOT "NOT"
-OP_INC "++"
-OP_DEC "--"
 OP_SUM "+"
 OP_MUL "*"
 OP_RES "-"
@@ -125,8 +123,6 @@ DOSPUNTOS ":"
 {OP_AND}        {printf("\nOperadorY: %s\n", yytext);return OP_AND;}
 {OP_OR}         {printf("\nOperadorO: %s\n", yytext);return OP_OR;}
 {OP_NOT}        {printf("\nOperadorNot: %s\n", yytext);return OP_NOT;}
-{OP_INC}        {printf("\nOperadorInc: %s\n", yytext);return OP_INC;}
-{OP_DEC}        {printf("\nOperadorDec: %s\n", yytext);return OP_DEC;}
 {OP_SUM}        {printf("\nSuma: %s\n", yytext);return OP_SUM;}
 {OP_MUL}        {printf("\nMultiplicacion: %s\n", yytext);return OP_MUL;}
 {OP_RES}        {printf("\nResta: %s\n", yytext);return OP_RES;}
@@ -145,11 +141,6 @@ DOSPUNTOS ":"
 {PUNTOCOMA}	    {printf("\nPuntoComa: %s\n", yytext);return PUNTOCOMA;}
 {DOSPUNTOS}     {printf("\nDos Puntos: %s\n", yytext);return DOSPUNTOS;}
 
-"\n"      		
-"\t"
-"\n\t"
-" "             		
-"\r\n"
 "\n"      		
 "\t"
 "\n\t"
