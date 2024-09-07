@@ -10,7 +10,6 @@
 #define Int "int"
 #define Float "float"
 #define String "string"
-#define Char "char"
 
 int yystopparser=0;
 FILE  *yyin;
@@ -22,7 +21,6 @@ char* tipoVariable;
 %union {
     int intval;
     float floatval;
-    char charval;
     char *strval;
 }
 
@@ -30,7 +28,6 @@ char* tipoVariable;
 %token <intval> CTE
 %token <floatval> CONST_REAL
 %token <strval> CONST_STRING
-%token <charval> CONST_CHAR
 
 //Palabras reservadas
 %token INIT
@@ -40,7 +37,6 @@ char* tipoVariable;
 %token MAIN
 %token RETURN
 %token VOID
-%token CHAR
 %token FLOAT
 %token STRING
 %token SI
@@ -108,10 +104,6 @@ tipo:
                 printf("Tipo float correcto\n");
                 tipoVariable = Float;
              }
-    | CHAR   {
-                printf("Tipo char correcto\n");
-                tipoVariable = Char;
-             }
     | STRING {
                 printf("Tipo string correcto\n");
                 tipoVariable = String;
@@ -159,7 +151,6 @@ termino:
 factor:
     ID {buscarEnTabla((char*)$1) == -1 ? yyerror("Variable no declarada") : printf("Factor correcto\n");}
     | CONST_REAL {printf("Factor correcto\n");}
-    | CONST_CHAR {printf("Factor correcto\n");}
     | CONST_STRING {printf("Factor correcto\n");}
     | CTE {printf("Factor correcto\n");}
     | PA expresion_aritmetica PC {printf("Factor correcto\n");}

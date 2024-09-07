@@ -21,8 +21,7 @@ CARACESP [@|#|$|%|&|_]
 ESPACIO " "
 
 CTE {DIGITO}+
-CONST_REAL {DIGITO}+"."{DIGITO}+|{DIGITO}+"."{DIGITO}*|{DIGITO}*"."{DIGITO}+
-CONST_CHAR "'"{LETRA}"'"
+CONST_REAL {DIGITO}+"."{DIGITO}+
 CONST_STRING "\""{LETRA}+|{CARACESP}+({LETRA}|{DIGITO})*{0,40}"\""
 ID {LETRA}({LETRA}|{DIGITO})*
 COMENTARIO "*-"({LETRA}|{DIGITO}|{ESPACIO})*"-*"
@@ -70,6 +69,7 @@ ESCRIBIR "escribir"
 TRIANGULO "triangulo"
 SUMALOSULTIMOS "sumaLosUltimos"
 
+
 COMA ","
 PUNTOCOMA ";"
 DOSPUNTOS ":"
@@ -78,7 +78,7 @@ DOSPUNTOS ":"
 {COMENTARIO}	{printf("\nComentario: %s\n", yytext);}
 {CTE}	        { 
                 long value = atol(yytext); 
-                if (value < 0 || value > SHRT_MAX) { 
+                if (value < SHRT_MIN || value > SHRT_MAX) { 
                     printf("ERROR: Constante entera fuera del rango de 16 bits: %s\n", yytext); 
                     exit(1); 
                 } 
@@ -87,7 +87,7 @@ DOSPUNTOS ":"
 }
 {CONST_REAL}    {
                 float valor = atof(yytext);
-                if (valor < -FLT_MAX || valor > FLT_MAX) {
+                if (valor < 0 || valor > FLT_MAX) {
                     printf("ERROR LEXICO: Constante real fuera de rango: %s\n", yytext);
                     exit(0);
                 }
@@ -101,14 +101,6 @@ DOSPUNTOS ":"
                 }
                 printf("\nConstanteString: %s\n", yytext); 
                 return CONST_STRING; 
-}
-{CONST_CHAR}    { 
-                if (strlen(yytext) != 3) {  // 'X' tiene 3 caracteres (comilla, carácter, comilla)
-                    printf("ERROR: Constante char debe ser un solo carácter: %s\n", yytext); 
-                    exit(1); 
-                }
-                printf("\nConstanteChar: %s\n", yytext); 
-                return CONST_CHAR; 
 }
 
 {INIT}          {printf("\nInit: %s\n", yytext);return INIT;}
@@ -126,8 +118,8 @@ DOSPUNTOS ":"
 {MIENTRAS}	    {printf("\nMientras: %s\n", yytext);return MIENTRAS;}
 {LEER}	        {printf("\nLeer: %s\n", yytext);return LEER;}
 {ESCRIBIR}	    {printf("\nEscribir: %s\n", yytext);return ESCRIBIR;}
-{TRIANGULO}     {printf("\nTriangulo: %s\n", yytext);return TRIANGULO;}
-{SUMALOSULTIMOS}     {printf("\nSumaLosUltimos: %s\n", yytext);return SUMALOSULTIMOS;}
+{TRIANGULO}	    {printf("\nTriangulo: %s\n", yytext);return TRIANGULO;}
+{SUMALOSULTIMOS}	{printf("\nSumaLosUltimos: %s\n", yytext);return SUMALOSULTIMOS;}
 {ID}	        {
                     printf("\nIdentificador: %s\n", yytext);
                     yylval.strval = strdup(yytext);
@@ -166,11 +158,11 @@ DOSPUNTOS ":"
 {PUNTOCOMA}	    {printf("\nPuntoComa: %s\n", yytext);return PUNTOCOMA;}
 {DOSPUNTOS}     {printf("\nDos Puntos: %s\n", yytext);return DOSPUNTOS;}
 
-"\n"      		{printf("\n");return 0;}
-"\t"            {printf("\t");return 0;}
-"\n\t"          {printf("\n\t");return 0;}
-" "             {printf(" ");return 0;}   	
-"\r\n"          {printf("\r\n");return 0;}
+"\n"      		
+"\t"
+"\n\t"
+" "             		
+"\r\n"
 .			     { printf("ERROR LEXICO: Caracter no reconocido: %s\n", yytext); exit(0);}
 
 %%
@@ -189,6 +181,3 @@ DOSPUNTOS ":"
 // fclose(yyin);
 // return 0;
 // }
-
-
-
