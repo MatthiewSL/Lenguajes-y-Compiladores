@@ -80,7 +80,6 @@ DOSPUNTOS ":"
 {CTE}	        { 
                 long value = atol(yytext); 
                 if (value < SHRT_MIN || value > SHRT_MAX) { 
-                if (value < SHRT_MIN || value > SHRT_MAX) { 
                     printf("ERROR: Constante entera fuera del rango de 16 bits: %s\n", yytext); 
                     exit(1); 
                 } 

@@ -16,8 +16,6 @@ FILE  *yyin;
 int yyerror();
 int yylex();
 char* tipoVariable;
-char tiposVariablesAsignadas[30][30];
-int cantVariableAsignadas = 0;
 %}
 
 %union {
@@ -35,19 +33,19 @@ int cantVariableAsignadas = 0;
 %token INIT
 %token DEFINE
 %token INCLUDE
+%token INT
 %token MAIN
 %token RETURN
 %token VOID
-%token CHAR
 %token FLOAT
 %token STRING
 %token SI
 %token SINO
 %token MIENTRAS
 %token LEER
+%token ESCRIBIR
 %token TRIANGULO
 %token SUMALOSULTIMOS
-%token ESCRIBIR
 
 //Operadores
 %right OP_AS
@@ -65,7 +63,6 @@ int cantVariableAsignadas = 0;
 %token OP_DEC
 %left OP_SUM OP_RES
 %left OP_MUL OP_DIV
-%right MENOS_UNARIO
 
 //Bloques
 %token LLA
@@ -87,16 +84,10 @@ programa:
     {
         printf("Programa correcto\n");
         guardarTabla();
-	}
-
-instrucciones:
-    bloque {printf("Instrucciones correcto\n");}
+	} 
 
 bloque_dec:
-    INIT LLA sentencia_declaracion LLC {printf("Bloque_dec correcto\n");}
-
-sentencia_declaracion:
-    declaracion sentencia_declaracion | declaracion {printf("Sentencia_declaracion correcto\n");}
+    INIT LLA declaracion LLC {printf("Bloque_dec correcto\n");}
 
 declaracion:
     ID COMA declaracion | ID DOSPUNTOS tipo PUNTOCOMA {
@@ -118,13 +109,23 @@ tipo:
                 tipoVariable = String;
              }
 
+instrucciones:
+    bloque {printf("Instrucciones correcto\n");}
+
+bloque:
+    sentencia bloque | sentencia {printf("Bloque correcto\n");}
+
 sentencia:
-    asignacion PUNTOCOMA
-	| bloque_if
+    asignacion PUNTOCOMA 
     | funcion PUNTOCOMA
+	| bloque_if
 	| bloque_while
 	| lectura PUNTOCOMA
 	| escritura PUNTOCOMA {printf("Sentencia correcto\n");}
+
+// ASIGNACIONES
+asignacion: //Aca chequear que la variable exista y que sea del tipo de la tabla
+    ID OP_AS expresion { buscarEnTabla((char*)$1) == -1 ? yyerror("Variable no declarada") : printf("Asignacion correcto\n");} 
 
 funcion:
     TRIANGULO PA expresion_aritmetica COMA expresion_aritmetica COMA expresion_aritmetica PC {printf("Funcion correcto\n");}
@@ -134,24 +135,8 @@ lista_numeros:
     CTE COMA lista_numeros
     | CTE {printf("Lista_numeros correcto\n");}
 
-bloque:
-    sentencia bloque | sentencia {printf("Bloque correcto\n");}
-
-// ASIGNACIONES
-asignacion: //Aca chequear que la variable exista y que sea del tipo de la tabla
-    ID OP_AS expresion_aritmetica 
-    {
-        int posEnTabla = buscarEnTabla($1);
-
-        if(posEnTabla != -1){
-            chequearTipos(posEnTabla);
-            cantVariableAsignadas = 0;
-            printf("Asignacion correcto\n");
-        }else{
-            printf("Variable %s no declarada\n",$1);
-            exit(-1);
-        }
-    } 
+expresion:
+    expresion_aritmetica {printf("Expresion correcto\n");}
 
 expresion_aritmetica:
     termino
@@ -166,7 +151,6 @@ termino:
 factor:
     ID {buscarEnTabla((char*)$1) == -1 ? yyerror("Variable no declarada") : printf("Factor correcto\n");}
     | CONST_REAL {printf("Factor correcto\n");}
-    | CONST_CHAR {printf("Factor correcto\n");}
     | CONST_STRING {printf("Factor correcto\n");}
     | CTE {printf("Factor correcto\n");}
     | PA expresion_aritmetica PC {printf("Factor correcto\n");}
@@ -197,13 +181,13 @@ bloque_while:
     MIENTRAS PA expresion_logica PC LLA instrucciones LLC {printf("Bloque_while correcto\n");}
 
 lectura:
-    LEER PA ID PC { buscarEnTabla($3) != -1 ? printf("Lectura correcto\n") : printf("Variable %s no declarada\n",$3); exit(-1);}
+    LEER PA ID PC {buscarEnTabla($3) == -1 ? yyerror("Variable no declarada") : printf("Lectura correcto\n");}
 
 escritura:
-    ESCRIBIR PA valor_escritura PC { printf("Escritura correcto\n");}
+    ESCRIBIR PA valor_escritura PC {printf("Escritura correcto\n");}
 
 valor_escritura:
-    ID {buscarEnTabla($1) != -1 ? printf("Valor_escritura correcto\n") : printf("Variable %s no declarada\n",$1); exit(-1);}
+    ID {buscarEnTabla((char*)$1) == -1 ? yyerror("Variable no declarada") : printf("Valor_escritura correcto\n");}
     | CONST_STRING {printf("Valor_escritura correcto\n");}
 %%
 
@@ -246,20 +230,6 @@ int buscarEnTabla(char* nombre){
         return -1;
     }
     return -1;
-}
-
-int chequearTipos(int posEnTabla){
-    int i = 0;
-    for(i = 0; i < cantVariableAsignadas; i++){
-        if(strcmp(tabla[posEnTabla].tipo, tiposVariablesAsignadas[i]) != 0){
-            if(strcmp(tabla[posEnTabla].tipo, Float) == 0 && strcmp(tiposVariablesAsignadas[i], Int) == 0){
-                return 0;
-            }
-            printf("Error: Asignacion de tipos incompatibles\n");
-            exit(-1);
-        }
-    }
-    return 0;
 }
 
 void guardarTabla() {
