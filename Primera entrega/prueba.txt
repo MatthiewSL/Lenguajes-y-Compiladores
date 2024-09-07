@@ -1,8 +1,5 @@
-int main(){
- init{
-    a : float;
-    b : string;
-    c : int;
- }
-a:=3+(-10);
+int main() {
+    init {
+        b, e : int;
+    }
 }

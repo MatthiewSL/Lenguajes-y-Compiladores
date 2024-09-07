@@ -24,7 +24,6 @@ int cantVariableAsignadas = 0;
 %union {
     int intval;
     float floatval;
-    char charval;
     char *strval;
 }
 
@@ -32,7 +31,6 @@ int cantVariableAsignadas = 0;
 %token <intval> CTE
 %token <floatval> CONST_REAL
 %token <strval> CONST_STRING
-%token <charval> CONST_CHAR
 
 //Palabras reservadas
 %token INIT
@@ -41,7 +39,6 @@ int cantVariableAsignadas = 0;
 %token MAIN
 %token RETURN
 %token VOID
-%token CHAR
 %token INT
 %token FLOAT
 %token STRING
@@ -94,7 +91,7 @@ programa:
 	}
 
 instrucciones:
-    bloque {printf("Instrucciones correcto\n");}
+        bloque {printf("Instrucciones correcto\n");}
 
 bloque_dec:
     INIT LLA sentencia_declaracion LLC {printf("Bloque_dec correcto\n");}
@@ -103,7 +100,9 @@ sentencia_declaracion:
     declaracion sentencia_declaracion | declaracion {printf("Sentencia_declaracion correcto\n");}
 
 declaracion:
-    ID COMA declaracion | ID DOSPUNTOS tipo PUNTOCOMA {
+    ID COMA declaracion {agregarATabla($1);}
+    | ID DOSPUNTOS tipo PUNTOCOMA
+    {
 		agregarATabla($1);
 		printf("Declaracion correcto\n");
     }
@@ -116,10 +115,6 @@ tipo:
     | FLOAT  {
                 printf("Tipo float correcto\n");
                 tipoVariable = Float;
-             }
-    | CHAR   {
-                printf("Tipo char correcto\n");
-                tipoVariable = Char;
              }
     | STRING {
                 printf("Tipo string correcto\n");
@@ -187,12 +182,6 @@ factor:
     | CONST_REAL 
     {
         strcpy(tiposVariablesAsignadas[cantVariableAsignadas], Float);
-        cantVariableAsignadas++;
-        printf("Factor correcto\n");
-    }
-    | CONST_CHAR
-    {
-        strcpy(tiposVariablesAsignadas[cantVariableAsignadas], Char);
         cantVariableAsignadas++;
         printf("Factor correcto\n");
     }

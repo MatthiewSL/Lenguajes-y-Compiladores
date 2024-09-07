@@ -20,24 +20,20 @@ LETRA   [a-zA-Z]
 CARACESP [@|#|$|%|&|_]
 ESPACIO " "
 
+COMENTARIO \*-[^\n]*-\*
 CTE {DIGITO}+
 CONST_REAL {DIGITO}+"."{DIGITO}+|{DIGITO}+"."{DIGITO}*|{DIGITO}*"."{DIGITO}+
-CONST_CHAR "'"{LETRA}"'"
 CONST_STRING \"([^\"\\\\]|\\\\.)*\"
 ID {LETRA}({LETRA}|{DIGITO})*
-COMENTARIO "*-"({LETRA}|{DIGITO}|{ESPACIO})*"-*"
 
 OP_AS ":="
 OP_COMP "=="
 OP_DIF "!="
 OP_MAYOR ">"
 OP_MENOR "<"
-OP_MAYORIG ">="
-OP_MENORIG "<="
-OP_AND "&&"
-OP_OR "||"
-OP_NOT "!"
-OP_MOD "%"
+OP_AND "AND"
+OP_OR "OR"
+OP_NOT "NOT"
 OP_INC "++"
 OP_DEC "--"
 OP_SUM "+"
@@ -56,20 +52,15 @@ MIENTRAS "mientras"
 SI "si"
 SINO "sino"
 INIT "init"
-DEFINE "define"
-INCLUDE "include"
 MAIN "main"
 RETURN "return"
-VOID "void"
 FLOAT "float"
-CHAR "char"
 INT "int"
 STRING "string"
 LEER "leer"
 ESCRIBIR "escribir"
 TRIANGULO "triangulo"
 SUMALOSULTIMOS "sumaLosUltimos"
-
 
 COMA ","
 PUNTOCOMA ";"
@@ -103,22 +94,10 @@ DOSPUNTOS ":"
                 printf("\nConstanteString: %s\n", yytext); 
                 return CONST_STRING; 
 }
-{CONST_CHAR}    { 
-                if (strlen(yytext) != 3) {  // 'X' tiene 3 caracteres (comilla, carácter, comilla)
-                    printf("ERROR: Constante char debe ser un solo carácter: %s\n", yytext); 
-                    exit(1); 
-                }
-                printf("\nConstanteChar: %s\n", yytext); 
-                return CONST_CHAR; 
-}
 
 {INIT}          {printf("\nInit: %s\n", yytext);return INIT;}
-{DEFINE}		{printf("\nDefine: %s\n", yytext);return DEFINE;}
-{INCLUDE}		{printf("\nInclude: %s\n", yytext);return INCLUDE;}
 {MAIN}			{printf("\nMain: %s\n", yytext);return MAIN;}
 {RETURN}		{printf("\nReturn: %s\n", yytext);return RETURN;}
-{VOID}			{printf("\nVoid: %s\n", yytext);return VOID;}
-{CHAR}			{printf("\nChar: %s\n", yytext);return CHAR;}
 {FLOAT}			{printf("\nFloat: %s\n", yytext);return FLOAT;}
 {INT}			{printf("\nInt: %s\n", yytext);return INT;}
 {STRING}		{printf("\nString: %s\n", yytext);return STRING;}
@@ -141,12 +120,9 @@ DOSPUNTOS ":"
 {OP_DIF}        {printf("\nDiferenteDe: %s\n", yytext);return OP_DIF;}
 {OP_MAYOR}      {printf("\nMayorQue: %s\n", yytext);return OP_MAYOR;}
 {OP_MENOR}      {printf("\nMenorQue: %s\n", yytext);return OP_MENOR;}
-{OP_MAYORIG}    {printf("\nMayorIgual: %s\n", yytext);return OP_MAYORIG;}
-{OP_MENORIG}    {printf("\nMenorIgual: %s\n", yytext);return OP_MENORIG;}
 {OP_AND}        {printf("\nOperadorY: %s\n", yytext);return OP_AND;}
 {OP_OR}         {printf("\nOperadorO: %s\n", yytext);return OP_OR;}
 {OP_NOT}        {printf("\nOperadorNot: %s\n", yytext);return OP_NOT;}
-{OP_MOD}        {printf("\nOperadorMod: %s\n", yytext);return OP_MOD;}
 {OP_INC}        {printf("\nOperadorInc: %s\n", yytext);return OP_INC;}
 {OP_DEC}        {printf("\nOperadorDec: %s\n", yytext);return OP_DEC;}
 {OP_SUM}        {printf("\nSuma: %s\n", yytext);return OP_SUM;}
@@ -175,18 +151,3 @@ DOSPUNTOS ":"
 .			     { printf("ERROR LEXICO: Caracter no reconocido: %s\n", yytext); exit(0);}
 
 %%
-
-
-// int main(int argc,char *argv[])
-// {
-// if ((yyin = fopen(argv[1], "rt")) == NULL)
-// {
-// printf("\nNo se puede abrir el archivo: %s\n", argv[1]);
-// }
-// else
-// {
-// yylex();
-// }
-// fclose(yyin);
-// return 0;
-// }
