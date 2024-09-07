@@ -70,6 +70,7 @@ TRIANGULO "triangulo"
 SUMALOSULTIMOS "sumaLosUltimos"
 
 
+
 COMA ","
 PUNTOCOMA ";"
 DOSPUNTOS ":"
@@ -78,6 +79,7 @@ DOSPUNTOS ":"
 {COMENTARIO}	{printf("\nComentario: %s\n", yytext);}
 {CTE}	        { 
                 long value = atol(yytext); 
+                if (value < SHRT_MIN || value > SHRT_MAX) { 
                 if (value < SHRT_MIN || value > SHRT_MAX) { 
                     printf("ERROR: Constante entera fuera del rango de 16 bits: %s\n", yytext); 
                     exit(1); 
@@ -120,6 +122,8 @@ DOSPUNTOS ":"
 {ESCRIBIR}	    {printf("\nEscribir: %s\n", yytext);return ESCRIBIR;}
 {TRIANGULO}	    {printf("\nTriangulo: %s\n", yytext);return TRIANGULO;}
 {SUMALOSULTIMOS}	{printf("\nSumaLosUltimos: %s\n", yytext);return SUMALOSULTIMOS;}
+{TRIANGULO}	    {printf("\nTriangulo: %s\n", yytext);return TRIANGULO;}
+{SUMALOSULTIMOS}	{printf("\nSumaLosUltimos: %s\n", yytext);return SUMALOSULTIMOS;}
 {ID}	        {
                     printf("\nIdentificador: %s\n", yytext);
                     yylval.strval = strdup(yytext);
@@ -158,6 +162,11 @@ DOSPUNTOS ":"
 {PUNTOCOMA}	    {printf("\nPuntoComa: %s\n", yytext);return PUNTOCOMA;}
 {DOSPUNTOS}     {printf("\nDos Puntos: %s\n", yytext);return DOSPUNTOS;}
 
+"\n"      		
+"\t"
+"\n\t"
+" "             		
+"\r\n"
 "\n"      		
 "\t"
 "\n\t"

@@ -15,6 +15,7 @@ int cantVarInsertadas=0;
 void guardarTabla();
 void agregarATabla(char* nombre);
 int buscarEnTabla(char * name);
+int chequearTipos(int posEnTabla);
 
 
 #endif // INCLUDE_TABLA_H

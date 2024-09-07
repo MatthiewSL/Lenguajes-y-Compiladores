@@ -1,6 +1,8 @@
 int main(){
  init{
     a : float;
+    b : string;
+    c : int;
  }
-c:=d*(e-21)/4;
+a:=3+(-10);
 }
