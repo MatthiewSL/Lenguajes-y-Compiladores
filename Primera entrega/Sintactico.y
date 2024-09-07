@@ -16,6 +16,8 @@ FILE  *yyin;
 int yyerror();
 int yylex();
 char* tipoVariable;
+int cantVariablesAsignadas = 0;
+char tiposVariablesAsignadas[100][100];
 %}
 
 %union {
@@ -34,7 +36,6 @@ char* tipoVariable;
 %token INT
 %token MAIN
 %token RETURN
-%token INT
 %token FLOAT
 %token STRING
 %token SI
@@ -198,9 +199,7 @@ comp_bool:
     OP_COMP
     | OP_DIF
     | OP_MAYOR
-    | OP_MENOR
-    | OP_MAYORIG
-    | OP_MENORIG {printf("Comp_bool correcto\n");}
+    | OP_MENOR {printf("Comp_bool correcto\n");}
 
 bloque_while:
     MIENTRAS PA expresion_logica PC LLA instrucciones LLC {printf("Bloque_while correcto\n");}
