@@ -23,6 +23,7 @@ ESPACIO " "
 COMENTARIO \*-[^\n]*-\*
 CTE {DIGITO}+
 CONST_REAL {DIGITO}+"."{DIGITO}+|{DIGITO}+"."{DIGITO}*|{DIGITO}*"."{DIGITO}+
+CONST_CHAR "'"{LETRA}"'"
 CONST_STRING \"([^\"\\\\]|\\\\.)*\"
 ID {LETRA}({LETRA}|{DIGITO})*
 
@@ -53,12 +54,14 @@ INIT "init"
 MAIN "main"
 RETURN "return"
 FLOAT "float"
+CHAR "char"
 INT "int"
 STRING "string"
 LEER "leer"
 ESCRIBIR "escribir"
 TRIANGULO "triangulo"
 SUMALOSULTIMOS "sumaLosUltimos"
+
 
 COMA ","
 PUNTOCOMA ";"
@@ -68,7 +71,7 @@ DOSPUNTOS ":"
 {COMENTARIO}	{printf("\nComentario: %s\n", yytext);}
 {CTE}	        { 
                 long value = atol(yytext); 
-                if (value < SHRT_MIN || value > SHRT_MAX) { 
+                if (value < 0 || value > SHRT_MAX) { 
                     printf("ERROR: Constante entera fuera del rango de 16 bits: %s\n", yytext); 
                     exit(1); 
                 } 
@@ -106,13 +109,6 @@ DOSPUNTOS ":"
 {ESCRIBIR}	    {printf("\nEscribir: %s\n", yytext);return ESCRIBIR;}
 {TRIANGULO}	    {printf("\nTriangulo: %s\n", yytext);return TRIANGULO;}
 {SUMALOSULTIMOS}	{printf("\nSumaLosUltimos: %s\n", yytext);return SUMALOSULTIMOS;}
-{TRIANGULO}	    {printf("\nTriangulo: %s\n", yytext);return TRIANGULO;}
-{SUMALOSULTIMOS}	{printf("\nSumaLosUltimos: %s\n", yytext);return SUMALOSULTIMOS;}
-{ID}	        {
-                    printf("\nIdentificador: %s\n", yytext);
-                    yylval.strval = strdup(yytext);
-                    return ID; 
-                }
 
 
 {OP_AS}	        {printf("\nAsignacion: %s\n", yytext);return OP_AS;}
@@ -125,9 +121,8 @@ DOSPUNTOS ":"
 {OP_NOT}        {printf("\nOperadorNot: %s\n", yytext);return OP_NOT;}
 {OP_SUM}        {printf("\nSuma: %s\n", yytext);return OP_SUM;}
 {OP_MUL}        {printf("\nMultiplicacion: %s\n", yytext);return OP_MUL;}
-{OP_RES}        {printf("\nResta: %s\n", yytext);return OP_RES;}
+{OP_RES}        {printf("\nOperador resta: %s\n", yytext);return OP_RES;}
 {OP_DIV}        {printf("\nDivision: %s\n", yytext);return OP_DIV;}
-
 
 {PA}	        {printf("\nParAbre: %s\n", yytext);return PA;}
 {PC}	        {printf("\nParCierra: %s\n", yytext);return PC;}
@@ -140,6 +135,11 @@ DOSPUNTOS ":"
 {COMA}	        {printf("\nComa: %s\n", yytext);return COMA;}
 {PUNTOCOMA}	    {printf("\nPuntoComa: %s\n", yytext);return PUNTOCOMA;}
 {DOSPUNTOS}     {printf("\nDos Puntos: %s\n", yytext);return DOSPUNTOS;}
+{ID}	        {
+                    printf("\nIdentificador: %s\n", yytext);
+                    yylval.strval = strdup(yytext);
+                    return ID; 
+                }
 
 "\n"      		
 "\t"
