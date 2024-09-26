@@ -11,6 +11,9 @@
 #define Float "float"
 #define String "string"
 #define Char "char"
+#define CTE_STRNG "CTE_STRING"
+#define CTE_INT "CTE_INTEGER"
+#define CTE_FLOAT "CTE_FLOAT"
 
 int yystopparser=0;
 FILE  *yyin;
@@ -235,7 +238,32 @@ valor_escritura:
     | CONST_STRING {printf("Valor_escritura correcto\n");}
 %%
 
-/** Agrega una constante a la tabla de simbolos con el tipo ese*/
+void agregarCteATabla(char* nombre, char* tipo){
+    if(cantVarInsertadas >=TAMANIO_TABLA){
+        printf("Error: sin espacio en la tabla de simbolos.\n");
+        system("Pause");
+        exit(2);
+    }
+    //Si no hay otra cte con el mismo valor...
+    if(buscarEnTabla(nombre) == -1){
+        //Agregar tipo de dato
+        strcpy(tabla[cantVarInsertadas].tipo,tipo);
+
+        //Agregar valor a la tabla
+        strcpy(tabla[cantVarInsertadas].nombre,nombre); 
+
+        //Agregar longitud
+        tabla[cantVarInsertadas].longitud = strlen(nombre); 
+        //Agregar nombre a tabla
+        cantVarInsertadas++;
+    }
+    else{
+        printf("No se pueden ingresar variables con nombre repetido.\n");
+        system("Pause");
+        exit(2);
+    }
+}
+
 void agregarATabla(char* nombre){
     printf("Agregando a tabla: %s\n", nombre);
 	if(cantVarInsertadas >=TAMANIO_TABLA){
