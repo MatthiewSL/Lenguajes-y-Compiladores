@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include "y.tab.h"
 #include <string.h>
-#include "tabla.h"
+#include "./Includes/tabla.h"
+#include "./includes/gci.h"
 
 #define Int "int"
 #define Float "float"
@@ -51,7 +52,7 @@ int cantVariableAsignadas = 0;
 %token ESCRIBIR
 
 //Operadores
-%right OP_AS
+%right <strval> OP_AS
 %token OP_COMP
 %token OP_DIF
 %token OP_MAYOR
@@ -61,8 +62,8 @@ int cantVariableAsignadas = 0;
 %token OP_NOT
 %token OP_INC
 %token OP_DEC
-%left OP_SUM OP_RES
-%left OP_MUL OP_DIV
+%left <strval> OP_SUM OP_RES
+%left <strval> OP_MUL OP_DIV
 %right MENOS_UNARIO
 
 //Bloques
@@ -83,7 +84,15 @@ int cantVariableAsignadas = 0;
 programa:
     INT MAIN PA PC LLA bloque_dec bloque LLC 
     {
-        printf("Programa correcto\n"); guardarTabla();
+        printf("Programa correcto\n");
+        insertarEnPolaca($1);
+        insertarEnPolaca($2);
+        insertarEnPolaca($3);
+        insertarEnPolaca($4);
+        insertarEnPolaca($5);
+        insertarEnPolaca($6);
+        guardarTabla();
+        guardarGCI();
     }
     | INT MAIN PA PC LLA bloque_dec LLC 
     {
@@ -97,6 +106,9 @@ bloque_dec:
 sentencia_declaracion:
     declaracion sentencia_declaracion | declaracion {printf("Sentencia_declaracion correcto\n");}
 
+
+// a,b,c,d : int;
+// ab,c,d,int:;
 declaracion:
     ID COMA declaracion 
     {
@@ -142,6 +154,10 @@ bloque:
     sentencia bloque | sentencia {printf("Bloque correcto\n");}
 
 // ASIGNACIONES
+
+//x:= z * 17.1 + 8
+//id2cte1*8+id1:=
+
 asignacion: //Aca chequear que la variable exista y que sea del tipo de la tabla
     ID OP_AS expresion_aritmetica 
     {
@@ -150,6 +166,8 @@ asignacion: //Aca chequear que la variable exista y que sea del tipo de la tabla
         if(posEnTabla != -1){
             chequearTipos(posEnTabla);
             cantVariableAsignadas = 0;
+            insertarEnPolaca($1);
+            insertarEnPolaca($2);
             printf("Asignacion correcto\n");
         }else{
             printf("Variable %s no declarada\n",$1);
@@ -159,13 +177,29 @@ asignacion: //Aca chequear que la variable exista y que sea del tipo de la tabla
 
 expresion_aritmetica:
     termino {printf("Expresion_aritmetica correcto\n");}
-    | expresion_aritmetica OP_SUM termino {printf("Expresion_aritmetica correcto\n");}
-    | expresion_aritmetica OP_RES termino {printf("Expresion_aritmetica correcto\n");}
+    | expresion_aritmetica OP_SUM termino 
+    {
+        insertarEnPolaca($2);
+        printf("Expresion_aritmetica correcto\n");
+    }
+    | expresion_aritmetica OP_RES termino 
+    {
+        insertarEnPolaca($2);
+        printf("Expresion_aritmetica correcto\n");
+    }
 
 termino:
     factor {printf("Termino correcto\n");}
-    | termino OP_MUL factor {printf("Termino correcto\n");}
-    | termino OP_DIV factor  {printf("Termino correcto\n");}
+    | termino OP_MUL factor 
+    {
+        insertarEnPolaca($2);
+        printf("Termino correcto\n");    
+    }
+    | termino OP_DIV factor  
+    {
+        insertarEnPolaca($2);
+        printf("Termino correcto\n");
+    }
 
 factor:
     ID 
@@ -174,6 +208,7 @@ factor:
         if(pos != -1){
             strcpy(tiposVariablesAsignadas[cantVariableAsignadas], tabla[pos].tipo);
             cantVariableAsignadas++;
+            insertarEnPolaca($1);
             printf("Factor correcto\n");
         }else{
             printf("Variable %s no declarada\n",$1);
@@ -184,6 +219,7 @@ factor:
     {
         strcpy(tiposVariablesAsignadas[cantVariableAsignadas], Float);
         cantVariableAsignadas++;
+        insertarEnPolacaFloat($1);
         agregarCteFloatATabla($1, CTE_FLOAT);
         printf("Factor correcto\n");
     }
@@ -191,7 +227,7 @@ factor:
     {
         strcpy(tiposVariablesAsignadas[cantVariableAsignadas], String);
         cantVariableAsignadas++;
-        printf("%s\n", $1);
+        insertarEnPolaca($1);
         agregarCteStringATabla($1, CTE_STRNG);
         printf("Factor correcto\n");
     }
@@ -199,6 +235,7 @@ factor:
     {
         strcpy(tiposVariablesAsignadas[cantVariableAsignadas], Int);
         cantVariableAsignadas++;
+        insertarEnPolacaInt($1);
         agregarCteIntATabla($1, CTE_INT);
         printf("Factor correcto\n");
     }
@@ -391,6 +428,45 @@ void guardarTabla() {
 
     fclose(archivo);
     printf("Informacion guardada en el archivo symbol-table.txt .\n");
+}
+
+void insertarEnPolaca(char *valorTerminal){
+    strcpy(vectGCI[cantItemsGCI], valorTerminal);
+    cantItemsGCI++;
+    printf("Insertando en polaca: %s\n", valorTerminal);
+}
+
+void insertarEnPolacaInt(int valorTerminal){
+    char valorStr[20];
+    sprintf(valorStr, "%d", valorTerminal);
+    strcpy(vectGCI[cantItemsGCI], valorStr);
+    cantItemsGCI++;
+    printf("Insertando en polaca: %d\n", valorTerminal);
+}
+
+void insertarEnPolacaFloat(float valorTerminal){
+    char valorStr[20];
+    sprintf(valorStr, "%.2f", valorTerminal);
+    strcpy(vectGCI[cantItemsGCI], valorStr);
+    cantItemsGCI++;
+    printf("Insertando en polaca: %.2f\n", valorTerminal);
+}
+
+
+void guardarGCI(){
+    FILE *archivo = fopen("gci.txt", "wt");
+    int i;
+    if (archivo == NULL) {
+        printf("Error al abrir el archivo.\n");
+        exit(1);
+    }
+
+    for (i = 0; i < cantItemsGCI; i++) {
+        fprintf(archivo, "%s\n", vectGCI[i]);
+    }
+
+    fclose(archivo);
+    printf("Informacion guardada en el archivo gci.txt .\n");
 }
 
 int main(int argc, char *argv[]){
