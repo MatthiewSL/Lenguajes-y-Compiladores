@@ -75,6 +75,7 @@ DOSPUNTOS ":"
                     printf("ERROR: Constante entera fuera del rango de 16 bits: %s\n", yytext); 
                     exit(1); 
                 } 
+                yylval.intval = value;
                 printf("\nConstante: %s\n", yytext); 
                 return CTE; 
 }
@@ -85,6 +86,7 @@ DOSPUNTOS ":"
                     exit(0);
                 }
                 printf("\nConstanteReal: %s\n", yytext);
+                yylval.floatval = valor;
                 return CONST_REAL;
                 }
 {CONST_STRING}  { 
@@ -93,6 +95,7 @@ DOSPUNTOS ":"
                     exit(1); 
                 }
                 printf("\nConstanteString: %s\n", yytext); 
+                yylval.strval = strdup(yytext);
                 return CONST_STRING; 
 }
 

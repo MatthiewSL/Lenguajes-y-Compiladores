@@ -191,6 +191,7 @@ factor:
     {
         strcpy(tiposVariablesAsignadas[cantVariableAsignadas], String);
         cantVariableAsignadas++;
+        printf("%s\n", $1);
         agregarCteStringATabla($1, CTE_STRNG);
         printf("Factor correcto\n");
     }
@@ -252,7 +253,7 @@ int agregarCteIntATabla(int valor, char* tipo){
         exit(2);
     }
 
-    char* valorStr = "";
+    char valorStr[20];
     sprintf(valorStr, "%d", valor);
 
     //Si no hay otra cte con el mismo valor...
@@ -270,11 +271,6 @@ int agregarCteIntATabla(int valor, char* tipo){
         //Agregar nombre a tabla
         cantVarInsertadas++;
     }
-    else{
-        printf("No se pueden ingresar variables con nombre repetido.\n");
-        system("Pause");
-        exit(2);
-    }
 }
 
 
@@ -286,9 +282,8 @@ int agregarCteFloatATabla(float valor, char* tipo){
         exit(2);
     }
     //Si no hay otra cte con el mismo valor...
-    char* valorStr = "";
-    sprintf(valorStr, "%f", valor);
-
+    char valorStr[20];
+    sprintf(valorStr, "%.2f", valor);
     printf("Agregando a tabla: %s\n", valorStr);
 
     if(buscarEnTabla(valorStr) == -1){
@@ -302,11 +297,6 @@ int agregarCteFloatATabla(float valor, char* tipo){
         tabla[cantVarInsertadas].longitud = strlen(valorStr);
         //Agregar nombre a tabla
         cantVarInsertadas++;
-    }
-    else{
-        printf("No se pueden ingresar variables con nombre repetido.\n");
-        system("Pause");
-        exit(2);
     }
 }
 
@@ -328,14 +318,9 @@ int agregarCteStringATabla(char* valor, char* tipo){
         strcpy(tabla[cantVarInsertadas].nombre,valor); 
 
         //Agregar longitud
-        tabla[cantVarInsertadas].longitud = strlen(valor);
+        tabla[cantVarInsertadas].longitud = strlen(valor)-2;
         //Agregar nombre a tabla
         cantVarInsertadas++;
-    }
-    else{
-        printf("No se pueden ingresar variables con nombre repetido.\n");
-        system("Pause");
-        exit(2);
     }
 }
 
