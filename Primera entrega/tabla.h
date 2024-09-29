@@ -14,6 +14,9 @@ int cantVarInsertadas=0;
 
 void guardarTabla();
 void agregarATabla(char* nombre);
+int agregarCteIntATabla(int valor, char* tipo);
+int agregarCteFloatATabla(float valor, char* tipo);
+int agregarCteStringATabla(char* valor, char* tipo);
 int buscarEnTabla(char * name);
 int chequearTipos(int posEnTabla);
 

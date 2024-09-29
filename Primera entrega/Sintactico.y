@@ -11,6 +11,9 @@
 #define Float "float"
 #define String "string"
 #define Char "char"
+#define CTE_STRNG "CTE_STRING"
+#define CTE_INT "CTE_INTEGER"
+#define CTE_FLOAT "CTE_FLOAT"
 
 int yystopparser=0;
 FILE  *yyin;
@@ -181,18 +184,22 @@ factor:
     {
         strcpy(tiposVariablesAsignadas[cantVariableAsignadas], Float);
         cantVariableAsignadas++;
+        agregarCteFloatATabla($1, CTE_FLOAT);
         printf("Factor correcto\n");
     }
     | CONST_STRING
     {
         strcpy(tiposVariablesAsignadas[cantVariableAsignadas], String);
         cantVariableAsignadas++;
+        printf("%s\n", $1);
+        agregarCteStringATabla($1, CTE_STRNG);
         printf("Factor correcto\n");
     }
     | CTE
     {
         strcpy(tiposVariablesAsignadas[cantVariableAsignadas], Int);
         cantVariableAsignadas++;
+        agregarCteIntATabla($1, CTE_INT);
         printf("Factor correcto\n");
     }
     | OP_RES factor %prec MENOS_UNARIO  // Agrega esta línea para el operador unario negativo
@@ -232,10 +239,91 @@ escritura:
 
 valor_escritura:
     ID {buscarEnTabla($1) != -1 ? printf("Valor_escritura correcto\n") : printf("Variable %s no declarada\n",$1); exit(-1);}
-    | CONST_STRING {printf("Valor_escritura correcto\n");}
+    | CONST_STRING 
+    {
+        agregarCteStringATabla($1, CTE_STRNG);
+        printf("Valor_escritura correcto\n");
+    }
 %%
 
-/** Agrega una constante a la tabla de simbolos con el tipo ese*/
+int agregarCteIntATabla(int valor, char* tipo){
+    if(cantVarInsertadas >=TAMANIO_TABLA){
+        printf("Error: sin espacio en la tabla de simbolos.\n");
+        system("Pause");
+        exit(2);
+    }
+
+    char valorStr[20];
+    sprintf(valorStr, "%d", valor);
+
+    //Si no hay otra cte con el mismo valor...
+    printf("Agregando a tabla: %s\n", valorStr);
+
+    if(buscarEnTabla(valorStr) == -1){
+        //Agregar tipo de dato
+        strcpy(tabla[cantVarInsertadas].tipo,tipo);
+
+        //Agregar valor a la tabla
+        strcpy(tabla[cantVarInsertadas].nombre,valorStr); 
+
+        //Agregar longitud
+        tabla[cantVarInsertadas].longitud = strlen(valorStr);
+        //Agregar nombre a tabla
+        cantVarInsertadas++;
+    }
+}
+
+
+
+int agregarCteFloatATabla(float valor, char* tipo){
+    if(cantVarInsertadas >=TAMANIO_TABLA){
+        printf("Error: sin espacio en la tabla de simbolos.\n");
+        system("Pause");
+        exit(2);
+    }
+    //Si no hay otra cte con el mismo valor...
+    char valorStr[20];
+    sprintf(valorStr, "%.2f", valor);
+    printf("Agregando a tabla: %s\n", valorStr);
+
+    if(buscarEnTabla(valorStr) == -1){
+        //Agregar tipo de dato
+        strcpy(tabla[cantVarInsertadas].tipo,tipo);
+
+        //Agregar valor a la tabla
+        strcpy(tabla[cantVarInsertadas].nombre,valorStr); 
+
+        //Agregar longitud
+        tabla[cantVarInsertadas].longitud = strlen(valorStr);
+        //Agregar nombre a tabla
+        cantVarInsertadas++;
+    }
+}
+
+
+int agregarCteStringATabla(char* valor, char* tipo){
+    if(cantVarInsertadas >=TAMANIO_TABLA){
+        printf("Error: sin espacio en la tabla de simbolos.\n");
+        system("Pause");
+        exit(2);
+    }
+
+    printf("Agregando a tabla: %s\n", valor);
+
+    if(buscarEnTabla(valor) == -1){
+        //Agregar tipo de dato
+        strcpy(tabla[cantVarInsertadas].tipo,tipo);
+
+        //Agregar valor a la tabla
+        strcpy(tabla[cantVarInsertadas].nombre,valor); 
+
+        //Agregar longitud
+        tabla[cantVarInsertadas].longitud = strlen(valor)-2;
+        //Agregar nombre a tabla
+        cantVarInsertadas++;
+    }
+}
+
 void agregarATabla(char* nombre){
     printf("Agregando a tabla: %s\n", nombre);
 	if(cantVarInsertadas >=TAMANIO_TABLA){
@@ -246,7 +334,6 @@ void agregarATabla(char* nombre){
 	//Si no hay otra variable con el mismo nombre...
 	if(buscarEnTabla(nombre) == -1){
 		//Agregar tipo de dato
-        printf("%d", cantVarInsertadas);
 		strcpy(tabla[cantVarInsertadas].tipo,tipoVariable);
 
 		//Agregar valor a la tabla
