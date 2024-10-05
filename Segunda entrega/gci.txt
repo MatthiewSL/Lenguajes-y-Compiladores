@@ -1,7 +1,31 @@
-b
-e
+a
+0
+CMP
+BLE
+31
 1
-*
-+
 a
 :=
+SEN ASIG
+a
+10
+CMP
+BLE
+16
+SEN ESC
+SEN IF
+a
+30
+CMP
+BGE
+28
+340
+a
+:=
+SEN ASIG
+BI
+16
+SEN WHILE
+BI
+0
+SEN WHILE

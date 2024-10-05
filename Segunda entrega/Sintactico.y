@@ -23,6 +23,7 @@ int yylex();
 char* tipoVariable;
 char tiposVariablesAsignadas[30][30];
 int cantVariableAsignadas = 0;
+char branchActual[4];
 %}
 
 %union {
@@ -67,12 +68,12 @@ int cantVariableAsignadas = 0;
 %right MENOS_UNARIO
 
 //Bloques
-%token LLA
-%token LLC
-%token CA
-%token CC
-%token PA
-%token PC
+%token <strval> LLA
+%token <strval> LLC
+%token <strval> CA
+%token <strval> CC
+%token <strval> PA
+%token <strval> PC
 
 //Otros
 %token <strval> ID
@@ -85,14 +86,8 @@ programa:
     INT MAIN PA PC LLA bloque_dec bloque LLC 
     {
         printf("Programa correcto\n");
-        insertarEnPolaca($1);
-        insertarEnPolaca($2);
-        insertarEnPolaca($3);
-        insertarEnPolaca($4);
-        insertarEnPolaca($5);
-        insertarEnPolaca($6);
-        guardarTabla();
         guardarGCI();
+        guardarTabla();
     }
     | INT MAIN PA PC LLA bloque_dec LLC 
     {
@@ -106,9 +101,6 @@ bloque_dec:
 sentencia_declaracion:
     declaracion sentencia_declaracion | declaracion {printf("Sentencia_declaracion correcto\n");}
 
-
-// a,b,c,d : int;
-// ab,c,d,int:;
 declaracion:
     ID COMA declaracion 
     {
@@ -135,12 +127,12 @@ tipo:
              }
 
 sentencia:
-    asignacion PUNTOCOMA
-	| bloque_if
-    | funcion PUNTOCOMA
-	| bloque_while
-	| lectura PUNTOCOMA
-	| escritura PUNTOCOMA {printf("Sentencia correcto\n");}
+    asignacion PUNTOCOMA {insertarEnPolaca("SEN ASIG"); printf("Sentencia correcto\n");}
+	| bloque_if {insertarEnPolaca("SEN IF") ;printf("Sentencia correcto\n");}
+    | funcion PUNTOCOMA {insertarEnPolaca("SEN FUNC") ;printf("Sentencia correcto\n");}
+	| bloque_while {insertarEnPolaca("SEN WHILE") ;printf("Sentencia correcto\n");}
+	| lectura PUNTOCOMA {insertarEnPolaca("SEN LEC") ;printf("Sentencia correcto\n");}
+	| escritura PUNTOCOMA {insertarEnPolaca("SEN ESC") ;printf("Sentencia correcto\n");}
 
 funcion:
     TRIANGULO PA expresion_aritmetica COMA expresion_aritmetica COMA expresion_aritmetica PC {printf("Funcion correcto\n");}
@@ -153,12 +145,7 @@ lista_numeros:
 bloque:
     sentencia bloque | sentencia {printf("Bloque correcto\n");}
 
-// ASIGNACIONES
-
-//x:= z * 17.1 + 8
-//id2cte1*8+id1:=
-
-asignacion: //Aca chequear que la variable exista y que sea del tipo de la tabla
+asignacion:
     ID OP_AS expresion_aritmetica 
     {
         int posEnTabla = buscarEnTabla($1);
@@ -247,26 +234,97 @@ factor:
 
 //BLOQUES ESPECIALES
 bloque_if:
-    SI PA expresion_logica PC LLA bloque LLC
-    | SI PA expresion_logica PC LLA bloque LLC SINO LLA bloque LLC {printf("Bloque_if correcto\n");}
+    SI PA expresion_logica PC LLA bloque LLC 
+    {
+        escribirEnPolaca(cantItemsGCI+1, pilaGCI[topeGCI]); 
+        topeGCI--;
+        printf("Bloque_if correcto\n");
+    }
+    | SI PA expresion_logica PC LLA bloque LLC SINO inicio_else bloque LLC 
+    {
+        escribirEnPolaca(cantItemsGCI+1, pilaGCI[topeGCI]);
+        topeGCI--;
+        printf("Bloque_if correcto\n");
+    }
+
+inicio_else:
+    LLA {
+        insertarEnPolaca("BI");
+        int auxBI = cantItemsGCI;
+        insertarEnPolaca("BLANCO");
+        escribirEnPolaca(cantItemsGCI, pilaGCI[topeGCI]);
+        topeGCI--;
+        apilarGCI(auxBI);
+        printf("Inicio_else correcto\n");
+    }
 
 expresion_logica:
-    termino_logico OP_AND termino_logico
-    | termino_logico OP_OR termino_logico
-    | OP_NOT termino_logico
-    | termino_logico {printf("Expresion_logica correcto\n");}
+    termino_logico OP_AND termino_logico 
+        {
+            insertarEnPolaca("BLANCO");
+            printf("Expresion_logica correcto\n");
+        }
+    | termino_logico OP_OR termino_logico 
+        {
+            insertarEnPolaca("BLANCO"); 
+            printf("Expresion_logica correcto\n");
+        }
+    | OP_NOT termino_logico 
+        {
+            insertarEnPolaca("BLANCO");
+            printf("Expresion_logica correcto\n");
+        }
+    | termino_logico 
+        {
+            insertarEnPolaca("BLANCO"); 
+            printf("Expresion_logica correcto\n");
+        }
 
 termino_logico:
-    expresion_aritmetica comp_bool expresion_aritmetica {printf("Termino_logico correcto\n");}
+    expresion_aritmetica comp_bool expresion_aritmetica 
+    {
+        insertarEnPolaca("CMP"); 
+        insertarEnPolaca(branchActual);
+        apilarGCI(cantItemsGCI);
+        printf("Termino_logico correcto\n");
+    }
 
 comp_bool:
-    OP_COMP {printf("Comp_bool correcto\n");}
-    | OP_DIF {printf("Comp_bool correcto\n");}
-    | OP_MAYOR {printf("Comp_bool correcto\n");}
-    | OP_MENOR {printf("Comp_bool correcto\n");}
+    OP_COMP {
+        strcpy(branchActual, "BNE");
+        printf("Comp_bool correcto\n"); 
+    }
+    | OP_DIF {
+        strcpy(branchActual, "BEQ");
+        printf("Comp_bool correcto\n"); 
+    }
+    | OP_MAYOR {
+        strcpy(branchActual, "BLE");
+        printf("Comp_bool correcto\n"); 
+    }
+    | OP_MENOR {
+        strcpy(branchActual, "BGE");
+        printf("Comp_bool correcto\n"); 
+    }
 
 bloque_while:
-    MIENTRAS PA expresion_logica PC LLA bloque LLC {printf("Bloque_while correcto\n");}
+    MIENTRAS inicio_parent expresion_logica PC LLA bloque LLC 
+    {
+        mostrarPila();
+        insertarEnPolaca("BI");
+        escribirEnPolaca(cantItemsGCI+2, pilaGCI[topeGCI]); //Es mas 2 porque me tengo que parar en la que le sigue al while y tener en cuenta la que le sigue al BI
+        topeGCI--;
+        escribirEnPolaca(pilaGCI[topeGCI], cantItemsGCI);
+        cantItemsGCI++;
+        topeGCI--;
+        printf("Bloque_while correcto\n");
+    }
+
+inicio_parent:
+    PA {
+        apilarGCI(cantItemsGCI);
+        mostrarPila();
+    }
 
 lectura:
     LEER PA ID PC { buscarEnTabla($3) != -1 ? printf("Lectura correcto\n") : printf("Variable %s no declarada\n",$3); exit(-1);}
@@ -309,8 +367,6 @@ int agregarCteIntATabla(int valor, char* tipo){
         cantVarInsertadas++;
     }
 }
-
-
 
 int agregarCteFloatATabla(float valor, char* tipo){
     if(cantVarInsertadas >=TAMANIO_TABLA){
@@ -433,7 +489,6 @@ void guardarTabla() {
 void insertarEnPolaca(char *valorTerminal){
     strcpy(vectGCI[cantItemsGCI], valorTerminal);
     cantItemsGCI++;
-    printf("Insertando en polaca: %s\n", valorTerminal);
 }
 
 void insertarEnPolacaInt(int valorTerminal){
@@ -441,7 +496,6 @@ void insertarEnPolacaInt(int valorTerminal){
     sprintf(valorStr, "%d", valorTerminal);
     strcpy(vectGCI[cantItemsGCI], valorStr);
     cantItemsGCI++;
-    printf("Insertando en polaca: %d\n", valorTerminal);
 }
 
 void insertarEnPolacaFloat(float valorTerminal){
@@ -453,6 +507,19 @@ void insertarEnPolacaFloat(float valorTerminal){
 }
 
 
+void apilarGCI(int valor){
+    topeGCI++;
+    pilaGCI[topeGCI] = valor;
+    printf("TOPE: %d\n", topeGCI);
+}
+
+void escribirEnPolaca(int valorTerminal, int pos){
+    char valorStr[20];
+    printf("%d %d\n", pos, valorTerminal);
+    sprintf(valorStr, "%d", valorTerminal);
+    strcpy(vectGCI[pos], valorStr);
+}
+
 void guardarGCI(){
     FILE *archivo = fopen("gci.txt", "wt");
     int i;
@@ -462,6 +529,7 @@ void guardarGCI(){
     }
 
     for (i = 0; i < cantItemsGCI; i++) {
+        printf("Guardando GCI: %s\n", vectGCI[i]);
         fprintf(archivo, "%s\n", vectGCI[i]);
     }
 
@@ -469,10 +537,17 @@ void guardarGCI(){
     printf("Informacion guardada en el archivo gci.txt .\n");
 }
 
+void mostrarPila(){
+    int i;
+    for(i = 0; i <= topeGCI; i++){
+        printf("%d\n", pilaGCI[i]);
+    }
+}
+
 int main(int argc, char *argv[]){
     if((yyin = fopen(argv[1], "rt"))==NULL){
         printf("\nNo se puede abrir el archivo de prueba: %s\n", argv[1]);
-    }else{ 
+    }else{
         yyparse();
     }
 

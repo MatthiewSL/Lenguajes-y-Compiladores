@@ -7,5 +7,14 @@ int main() {
 	    c: int;
     }
 
-    a := b + e * 1;
+    mientras(a > 0){
+        a := 1;
+        si(a > 10){
+            escribir("hola");
+        }
+
+        mientras(a < 30){
+            a := 340;
+        }
+    }
 }

@@ -99,7 +99,7 @@ DOSPUNTOS ":"
                 return CONST_STRING; 
 }
 
-{INIT}          {printf("\nInit: %s\n", yytext);return INIT;}
+{INIT}          {printf("\nInit: %s\n", yytext);yylval.strval = strdup(yytext);return INIT;}
 {MAIN}			{printf("\nMain: %s\n", yytext);return MAIN;}
 {RETURN}		{printf("\nReturn: %s\n", yytext);return RETURN;}
 {FLOAT}			{printf("\nFloat: %s\n", yytext);return FLOAT;}
