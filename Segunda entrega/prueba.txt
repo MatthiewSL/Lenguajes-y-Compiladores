@@ -4,17 +4,8 @@ int main() {
         b, e : int;
         d : string;
         w : int;
-	    c: int;
+	    c,x: int;
     }
 
-    mientras(a > 0){
-        a := 1;
-        si(a > 10){
-            escribir("hola");
-        }
-
-        mientras(a < 30){
-            a := 340;
-        }
-    }
+    d := triangulo(x, 1+1, x);
 }

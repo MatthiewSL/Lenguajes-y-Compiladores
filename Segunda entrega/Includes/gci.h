@@ -2,7 +2,7 @@
 #define INCLUDE_GCI_H_
 
 char vectGCI[500][20];
-int pilaGCI[100];
+int pilaGCI[500];
 int topeGCI = -1;
 int cantItemsGCI = 0;
 

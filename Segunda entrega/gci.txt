@@ -1,31 +1,46 @@
-a
-0
-CMP
-BLE
-31
+x
+@n1
+:=
 1
-a
+1
++
+@n2
 :=
-SEN ASIG
-a
-10
-CMP
-BLE
-16
-SEN ESC
-SEN IF
-a
-30
-CMP
-BGE
-28
-340
-a
+x
+@n3
 :=
-SEN ASIG
+@n1
+@n2
+CMP
+BNE
+27
+@n2
+@n3
+CMP
+BNE
+24
+EQUILATERO
 BI
-16
-SEN WHILE
+44
+ISOSCELES
 BI
-0
-SEN WHILE
+44
+@n2
+@n3
+CMP
+BNE
+35
+ISOSCELES
+BI
+44
+@n1
+@n3
+CMP
+BNE
+44
+ISOSCELES
+BI
+44
+ESCALENO
+d
+:=
