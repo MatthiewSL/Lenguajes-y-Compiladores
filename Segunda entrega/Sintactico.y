@@ -594,7 +594,6 @@ void guardarGCI(){
     }
 
     for (i = 0; i < cantItemsGCI; i++) {
-        printf("Guardando GCI: %s\n", vectGCI[i]);
         fprintf(archivo, "%s\n", vectGCI[i]);
     }
 
