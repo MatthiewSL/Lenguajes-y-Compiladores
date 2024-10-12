@@ -134,14 +134,19 @@ sentencia:
         {
             int pos = buscarEnTabla($1);
             if(pos != -1){
+                int tipoValido = chequearTipos(pos);
+                if(tipoValido != 0){
+                    printf("Error: Asignacion de tipos incompatibles\n");
+                    exit(-1);
+                }
                 strcpy(tiposVariablesAsignadas[cantVariableAsignadas], tabla[pos].tipo);
-                cantVariableAsignadas++;
                 insertarEnPolaca($1);
             }else{
                 printf("Variable %s no declarada\n",$1);
                 exit(-1);
             }
             insertarEnPolaca($2); 
+            cantVariableAsignadas = 0;
             printf("Sentencia correcto\n");    
         }
 	| bloque_while {insertarEnPolaca("SEN WHILE") ;printf("Sentencia correcto\n");}
@@ -149,10 +154,18 @@ sentencia:
 	| escritura PUNTOCOMA {insertarEnPolaca("SEN ESC") ;printf("Sentencia correcto\n");}
 
 funcion:
-    TRIANGULO PA expresion_aritmetica comaN1 expresion_aritmetica comaN2 expresion_aritmetica n3 PC {calcularTipoTriangulo() ;printf("Funcion correcto\n");}
-    | SUMALOSULTIMOS PA pivot PUNTOCOMA CA lista_numeros CC PC 
+    TRIANGULO PA expresion_aritmetica comaN1 expresion_aritmetica comaN2 expresion_aritmetica n3 PC 
+    {
+        calcularTipoTriangulo();
+        cantVariableAsignadas = 1;
+        strcpy(tiposVariablesAsignadas[0], String);
+        printf("Funcion correcto\n");
+    }
+    | SUMALOSULTIMOS PA pivot PUNTOCOMA CA lista_numeros CC PC
     {
         finalizarSumaLosUltimos();
+        cantVariableAsignadas = 1;
+        strcpy(tiposVariablesAsignadas[0], Float);
         printf("Funcion correcto\n");
     }
 
@@ -558,19 +571,16 @@ void insertarEnPolacaFloat(float valorTerminal){
     sprintf(valorStr, "%.2f", valorTerminal);
     strcpy(vectGCI[cantItemsGCI], valorStr);
     cantItemsGCI++;
-    printf("Insertando en polaca: %.2f\n", valorTerminal);
 }
 
 
 void apilarGCI(int valor){
     topeGCI++;
     pilaGCI[topeGCI] = valor;
-    printf("TOPE: %d\n", topeGCI);
 }
 
 void escribirEnPolaca(int valorTerminal, int pos){
     char valorStr[20];
-    printf("%d %d\n", pos, valorTerminal);
     sprintf(valorStr, "%d", valorTerminal);
     strcpy(vectGCI[pos], valorStr);
 }
@@ -602,7 +612,7 @@ void finalizarSumaLosUltimos(){
         insertarEnPolacaInt(0);
         return;
     }
- //P:4 E:6
+
     int i = pivotito,bandPrimeraVez = 0;
 
     for(i; i < cantElementos; i++){
