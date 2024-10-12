@@ -7,6 +7,7 @@
 #include <string.h>
 #include "./Includes/tabla.h"
 #include "./includes/gci.h"
+#include "./includes/gciFunciones.h"
 
 #define Int "int"
 #define Float "float"
@@ -129,18 +130,72 @@ tipo:
 sentencia:
     asignacion PUNTOCOMA {insertarEnPolaca("SEN ASIG"); printf("Sentencia correcto\n");}
 	| bloque_if {insertarEnPolaca("SEN IF") ;printf("Sentencia correcto\n");}
-    | funcion PUNTOCOMA {insertarEnPolaca("SEN FUNC") ;printf("Sentencia correcto\n");}
+    | ID OP_AS funcion PUNTOCOMA 
+        {
+            int pos = buscarEnTabla($1);
+            if(pos != -1){
+                strcpy(tiposVariablesAsignadas[cantVariableAsignadas], tabla[pos].tipo);
+                cantVariableAsignadas++;
+                insertarEnPolaca($1);
+            }else{
+                printf("Variable %s no declarada\n",$1);
+                exit(-1);
+            }
+            insertarEnPolaca($2); 
+            printf("Sentencia correcto\n");    
+        }
 	| bloque_while {insertarEnPolaca("SEN WHILE") ;printf("Sentencia correcto\n");}
 	| lectura PUNTOCOMA {insertarEnPolaca("SEN LEC") ;printf("Sentencia correcto\n");}
 	| escritura PUNTOCOMA {insertarEnPolaca("SEN ESC") ;printf("Sentencia correcto\n");}
 
 funcion:
-    TRIANGULO PA expresion_aritmetica COMA expresion_aritmetica COMA expresion_aritmetica PC {printf("Funcion correcto\n");}
-    | SUMALOSULTIMOS PA CTE PUNTOCOMA CA lista_numeros CC PC {printf("Funcion correcto\n");}
+    TRIANGULO PA expresion_aritmetica comaN1 expresion_aritmetica comaN2 expresion_aritmetica n3 PC {calcularTipoTriangulo() ;printf("Funcion correcto\n");}
+    | SUMALOSULTIMOS PA pivot PUNTOCOMA CA lista_numeros CC PC 
+    {
+        finalizarSumaLosUltimos();
+        printf("Funcion correcto\n");
+    }
+
+comaN1:
+    COMA {
+        insertarEnPolaca("@n1");
+        insertarEnPolaca(":=");
+        printf("ComaN1 correcto\n");
+    }
+
+
+comaN2:
+    COMA {
+        insertarEnPolaca("@n2");
+        insertarEnPolaca(":=");
+        printf("ComaN2 correcto\n");
+    }
+
+n3:
+    {
+        insertarEnPolaca("@n3");
+        insertarEnPolaca(":=");
+        printf("N3 correcto\n");
+    }
+
+pivot:
+ CTE {
+    pivotito = $1-1;
+    printf("Pivot correcto\n");
+    }
+ | OP_RES pivot %prec MENOS_UNARIO  // Agrega esta línea para el operador unario negativo
+    {
+        banderaTerminar = 1;
+        printf("Pivot negativo correcto\n");
+    }
 
 lista_numeros:
-    CTE COMA lista_numeros
-    | CTE {printf("Lista_numeros correcto\n");}
+    valor_lista {printf("Lista_numeros correcto\n");}
+    | lista_numeros COMA valor_lista 
+
+valor_lista:
+    CTE {insertarSumaLosUltimos($1);printf("Valor_lista correcto\n");}
+    | CONST_REAL {insertarSumaLosUltimos($1);printf("Valor_lista correcto\n");}
 
 bloque:
     sentencia bloque | sentencia {printf("Bloque correcto\n");}
@@ -535,6 +590,66 @@ void guardarGCI(){
 
     fclose(archivo);
     printf("Informacion guardada en el archivo gci.txt .\n");
+}
+
+void insertarSumaLosUltimos(float valor){
+   sumaLosUltimos[cantElementos] = valor;
+   cantElementos++;
+}
+
+void finalizarSumaLosUltimos(){
+    if(cantElementos < pivotito || banderaTerminar == 1){
+        insertarEnPolacaInt(0);
+        return;
+    }
+ //P:4 E:6
+    int i = pivotito,bandPrimeraVez = 0;
+
+    for(i; i < cantElementos; i++){
+        if(bandPrimeraVez == 0){
+            insertarEnPolacaFloat(sumaLosUltimos[i]);
+            bandPrimeraVez = 1;
+        }else{
+            insertarEnPolacaFloat(sumaLosUltimos[i]);
+            insertarEnPolaca("+");
+        }
+    }
+}
+
+void calcularTipoTriangulo(){
+    insertarEnPolaca("@n1");
+    insertarEnPolaca("@n2");
+    insertarEnPolaca("CMP");
+    insertarEnPolaca("BNE");
+    insertarEnPolacaInt(cantItemsGCI+12);
+    insertarEnPolaca("@n2");
+    insertarEnPolaca("@n3");
+    insertarEnPolaca("CMP");
+    insertarEnPolaca("BNE");
+    insertarEnPolacaInt(cantItemsGCI+4);
+    insertarEnPolaca("EQUILATERO");
+    insertarEnPolaca("BI");
+    insertarEnPolacaInt(cantItemsGCI+21);
+    insertarEnPolaca("ISOSCELES");
+    insertarEnPolaca("BI");
+    insertarEnPolacaInt(cantItemsGCI+18);
+    insertarEnPolaca("@n2");
+    insertarEnPolaca("@n3");
+    insertarEnPolaca("CMP");
+    insertarEnPolaca("BNE");
+    insertarEnPolacaInt(cantItemsGCI+4);
+    insertarEnPolaca("ISOSCELES");
+    insertarEnPolaca("BI");
+    insertarEnPolacaInt(cantItemsGCI+10);
+    insertarEnPolaca("@n1");
+    insertarEnPolaca("@n3");
+    insertarEnPolaca("CMP");
+    insertarEnPolaca("BNE");
+    insertarEnPolacaInt(cantItemsGCI+5);
+    insertarEnPolaca("ISOSCELES");
+    insertarEnPolaca("BI");
+    insertarEnPolacaInt(cantItemsGCI+2);
+    insertarEnPolaca("ESCALENO");
 }
 
 void mostrarPila(){
