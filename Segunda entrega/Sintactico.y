@@ -616,24 +616,6 @@ void finalizarSumaLosUltimos(){
     }
 }
 
-// if (a == b) { //BNE 2
-//     if (b == c) { //BNE 1
-//         BRANCH EQUI;
-//     } else { // 1
-//         BRANCH ISOCELES;
-//     }
-// } else { //2 
-//     if (b == c) { //BNE 3
-//         BRANCH ISOCELES;
-//     } else{ // 3
-//         if (a == c) {//BNE 4
-//             BRANCH ISOCELES;
-//         }else{//4
-//             BRANCH ESCALENO;
-//         }
-//     }
-// }
-
 void calcularTipoTriangulo(){
     insertarEnPolaca("@n1");
     insertarEnPolaca("@n2");
