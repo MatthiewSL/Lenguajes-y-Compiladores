@@ -2,6 +2,13 @@
 #define INCLUDE_TABLA_H_
 
 #define TAMANIO_TABLA 300
+#define Int "int"
+#define Float "float"
+#define String "string"
+#define Char "char"
+#define CTE_STRNG "CTE_STRING"
+#define CTE_INT "CTE_INTEGER"
+#define CTE_FLOAT "CTE_FLOAT"
 
 typedef struct  {
     char nombre[30];

@@ -9,7 +9,6 @@ FILE *yyin;
 char *yyltext;
 
 int yyerror(void);
-
 %}
 
 %option noyywrap  
@@ -96,6 +95,7 @@ DOSPUNTOS ":"
                 }
                 printf("\nConstanteString: %s\n", yytext); 
                 yylval.strval = strdup(yytext);
+                eliminarComillas(yylval.strval);
                 return CONST_STRING; 
 }
 

@@ -1,21 +1,12 @@
-// Usa Lexico_ClasePractica
-//Solo expresiones sin ()
 %{
 #include <stdio.h>
 #include <stdlib.h>
 #include "y.tab.h"
 #include <string.h>
 #include "./Includes/tabla.h"
-#include "./includes/gci.h"
-#include "./includes/gciFunciones.h"
-
-#define Int "int"
-#define Float "float"
-#define String "string"
-#define Char "char"
-#define CTE_STRNG "CTE_STRING"
-#define CTE_INT "CTE_INTEGER"
-#define CTE_FLOAT "CTE_FLOAT"
+#include "./Includes/gci.h"
+#include "./Includes/gciFunciones.h"
+#include "./Includes/assembler.h"
 
 int yystopparser=0;
 FILE  *yyin;
@@ -25,6 +16,8 @@ char* tipoVariable;
 char tiposVariablesAsignadas[30][30];
 int cantVariableAsignadas = 0;
 char branchActual[4];
+void eliminarComillas(char* cadena);
+void reemplazarEspaciosConGuion(char* cadena);
 %}
 
 %union {
@@ -89,6 +82,7 @@ programa:
         printf("Programa correcto\n");
         guardarGCI();
         guardarTabla();
+        generarAssembler();
     }
     | INT MAIN PA PC LLA bloque_dec LLC 
     {
@@ -172,6 +166,8 @@ funcion:
 comaN1:
     COMA {
         insertarEnPolaca("@n1");
+        tipoVariable = Float;
+        agregarATabla("@n1");
         insertarEnPolaca(":=");
         printf("ComaN1 correcto\n");
     }
@@ -180,6 +176,8 @@ comaN1:
 comaN2:
     COMA {
         insertarEnPolaca("@n2");
+        tipoVariable = Float;
+        agregarATabla("@n2");
         insertarEnPolaca(":=");
         printf("ComaN2 correcto\n");
     }
@@ -187,6 +185,8 @@ comaN2:
 n3:
     {
         insertarEnPolaca("@n3");
+        tipoVariable = Float;
+        agregarATabla("@n3");
         insertarEnPolaca(":=");
         printf("N3 correcto\n");
     }
@@ -283,6 +283,7 @@ factor:
         strcpy(tiposVariablesAsignadas[cantVariableAsignadas], String);
         cantVariableAsignadas++;
         insertarEnPolaca($1);
+        reemplazarEspaciosConGuion($1);
         agregarCteStringATabla($1, CTE_STRNG);
         printf("Factor correcto\n");
     }
@@ -404,6 +405,7 @@ valor_escritura:
     ID {buscarEnTabla($1) != -1 ? printf("Valor_escritura correcto\n") : printf("Variable %s no declarada\n",$1); exit(-1);}
     | CONST_STRING 
     {
+        reemplazarEspaciosConGuion($1);
         agregarCteStringATabla($1, CTE_STRNG);
         printf("Valor_escritura correcto\n");
     }
@@ -665,6 +667,87 @@ void mostrarPila(){
     int i;
     for(i = 0; i <= topeGCI; i++){
         printf("%d\n", pilaGCI[i]);
+    }
+}
+
+void eliminarComillas(char* cadena) {
+    int i = 0, j = 0;
+
+    while (cadena[i]) {
+        if (cadena[i] != '"') {
+            cadena[j] = cadena[i];
+            j++;
+        }
+        i++;
+    }
+
+    cadena[j] = '\0';
+}
+
+void reemplazarEspaciosConGuion(char* cadena) {
+    int i = 0;
+    
+    // Recorremos la cadena
+    while (cadena[i]) {
+        // Si encontramos un espacio, lo reemplazamos por '_'
+        if (cadena[i] == ' ') {
+            cadena[i] = '_';
+        }
+        i++;
+    }
+}
+
+void generarAssembler(){
+    FILE* arch = fopen("salida.asm", "wt");
+
+    if(!arch){
+		printf("No pude crear el archivo assembler\n");
+		return;
+	}
+
+    escribirInicio(arch);
+    escribirTabla(arch);
+    // escribirInicioCodigo(arch);
+    // escribirFinal(arch);
+    fclose(arch);
+}
+
+
+void escribirInicio(FILE* arch){
+    fprintf(arch, "include number.asm\n\n.MODEL LARGE\n.386\n.STACK 200h\n\n");
+}
+
+void escribirTabla(FILE* arch){
+    fprintf(arch, ".DATA\n");
+    int i;
+
+    for(i=0; i<cantVarInsertadas; i++){
+        eliminarComillas(tabla[i].nombre);
+
+        if (strcmp(tabla[i].tipo, CTE_INT) == 0) {
+            fprintf(arch, "CTE_%s ", tabla[i].nombre);
+            fprintf(arch, "dd %s\n", tabla[i].nombre);
+        }
+
+        if (strcmp(tabla[i].tipo, CTE_FLOAT) == 0) {
+            fprintf(arch, "CTE_%s ", tabla[i].nombre);
+            fprintf(arch, "dd %s\n", tabla[i].nombre);
+        }
+
+        if (strcmp(tabla[i].tipo, CTE_STRNG) == 0) {
+            fprintf(arch, "CTE_%s ", tabla[i].nombre);
+            fprintf(arch, "db \"%s\"\n", tabla[i].nombre);
+        }
+
+        if (strcmp(tabla[i].tipo, String) == 0) {
+            fprintf(arch, "%s ", tabla[i].nombre);
+            fprintf(arch, "db ?\n");
+        }
+
+        if (strcmp(tabla[i].tipo, Int) == 0 || strcmp(tabla[i].tipo, Float) == 0) {
+            fprintf(arch, "%s ", tabla[i].nombre);
+            fprintf(arch, "dd ?\n");
+        }
     }
 }
 
