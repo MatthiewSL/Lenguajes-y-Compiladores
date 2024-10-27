@@ -16,6 +16,7 @@ char* tipoVariable;
 char tiposVariablesAsignadas[30][30];
 int cantVariableAsignadas = 0;
 char branchActual[4];
+
 void eliminarComillas(char* cadena);
 void reemplazarEspaciosConGuion(char* cadena);
 %}
@@ -303,17 +304,48 @@ factor:
 
 //BLOQUES ESPECIALES
 bloque_if:
-    SI PA expresion_logica PC LLA bloque LLC 
+    SI PA expresion_logica PC llaif bloque LLC 
     {
-        escribirEnPolaca(cantItemsGCI+1, pilaGCI[topeGCI]); 
         topeGCI--;
+        if(huboOr == 1){
+            escribirEnPolaca(cantItemsGCI+1, pilaGCI[topeGCI]);
+            topeGCI--;
+            escribirEnPolaca(saltoOr, pilaGCI[topeGCI]);
+            topeGCI--;
+        }else{
+            while(pilaGCI[topeGCI] != -1 && topeGCI >= 0){
+                escribirEnPolaca(cantItemsGCI+1, pilaGCI[topeGCI]);
+                topeGCI--;
+            }
+        }
         printf("Bloque_if correcto\n");
     }
-    | SI PA expresion_logica PC LLA bloque LLC SINO inicio_else bloque LLC 
+    | SI PA expresion_logica PC llaif bloque LLC SINO inicio_else bloque LLC 
     {
         escribirEnPolaca(cantItemsGCI+1, pilaGCI[topeGCI]);
         topeGCI--;
+        if(huboOr == 1){
+            escribirEnPolaca(cantItemsGCI+1, pilaGCI[topeGCI]);
+            topeGCI--;
+            escribirEnPolaca(saltoOr, pilaGCI[topeGCI]);
+            topeGCI--;
+        }else{
+            while(pilaGCI[topeGCI] != -1 && topeGCI >= 0){
+                escribirEnPolaca(cantItemsGCI+1, pilaGCI[topeGCI]);
+                topeGCI--;
+            }
+        }
         printf("Bloque_if correcto\n");
+    }
+
+llaif:
+    LLA
+    {
+        if(huboOr == 1){
+            saltoOr = cantItemsGCI;
+        }
+        apilarGCI(-1);
+        printf("Pc_if correcto\n");
     }
 
 inicio_else:
@@ -328,16 +360,16 @@ inicio_else:
     }
 
 expresion_logica:
-    termino_logico OP_AND termino_logico 
+    termino_logico op_and termino_logico 
         {
             insertarEnPolaca("BLANCO");
             printf("Expresion_logica correcto\n");
         }
-    | termino_logico OP_OR termino_logico 
+    | termino_logico op_or termino_logico
         {
             insertarEnPolaca("BLANCO"); 
             printf("Expresion_logica correcto\n");
-        }
+        } 
     | OP_NOT termino_logico 
         {
             insertarEnPolaca("BLANCO");
@@ -349,9 +381,45 @@ expresion_logica:
             printf("Expresion_logica correcto\n");
         }
 
+op_and:
+    OP_AND {
+        insertarEnPolaca("BLANCO");
+        printf("Op_and correcto\n");
+    }
+
+op_or:
+    OP_OR {
+        huboOr = 1;
+        int cambio = 0;
+
+        if(strcmp(vectGCI[cantItemsGCI-1],"BNE") == 0){
+            strcpy(vectGCI[cantItemsGCI-1], "BEQ");
+            cambio = 1;
+        }
+
+        if(strcmp(vectGCI[cantItemsGCI-1],"BEQ") == 0 && cambio == 0){
+            strcpy(vectGCI[cantItemsGCI-1], "BNE");
+            cambio = 1;
+        }
+
+        if(strcmp(vectGCI[cantItemsGCI-1],"BLE") == 0 && cambio == 0){
+            strcpy(vectGCI[cantItemsGCI-1], "BGT");
+            cambio = 1;
+        }
+
+        if(strcmp(vectGCI[cantItemsGCI-1],"BGE") == 0 && cambio == 0){
+            strcpy(vectGCI[cantItemsGCI-1], "BLT");
+        }
+
+        insertarEnPolaca("BLANCO");
+        printf("Op_or correcto\n");
+    }
+
 termino_logico:
     expresion_aritmetica comp_bool expresion_aritmetica 
     {
+        chequearTiposComp();
+        cantVariableAsignadas = 0;
         insertarEnPolaca("CMP"); 
         insertarEnPolaca(branchActual);
         apilarGCI(cantItemsGCI);
@@ -379,7 +447,6 @@ comp_bool:
 bloque_while:
     MIENTRAS inicio_parent expresion_logica PC LLA bloque LLC 
     {
-        mostrarPila();
         insertarEnPolaca("BI");
         escribirEnPolaca(cantItemsGCI+2, pilaGCI[topeGCI]); //Es mas 2 porque me tengo que parar en la que le sigue al while y tener en cuenta la que le sigue al BI
         topeGCI--;
@@ -392,7 +459,6 @@ bloque_while:
 inicio_parent:
     PA {
         apilarGCI(cantItemsGCI);
-        mostrarPila();
     }
 
 lectura:
@@ -538,6 +604,26 @@ int chequearTipos(int posEnTabla){
     }
     return 0;
 }
+int chequearTiposComp(){
+    if(cantVariableAsignadas == 1){
+        return 0;
+    }
+
+    if(strcmp(tiposVariablesAsignadas[0], tiposVariablesAsignadas[1]) != 0){
+        if((strcmp(tiposVariablesAsignadas[0], Float) == 0 && 
+           strcmp(tiposVariablesAsignadas[1], Int) == 0) ||
+           (strcmp(tiposVariablesAsignadas[0], Int) == 0 && 
+           strcmp(tiposVariablesAsignadas[1], Float) == 0)
+           ){
+            return 0;
+        }
+
+        printf("Error: Comparacion de tipos incompatibles\n");
+        exit(-1);
+    }
+
+    return 0;
+}
 
 void guardarTabla() {
     FILE *archivo = fopen("symbol-table.txt", "wt");
@@ -581,7 +667,13 @@ void apilarGCI(int valor){
     pilaGCI[topeGCI] = valor;
 }
 
+void apilarOr(int valor){
+    topeGCI++;
+    pilaGCI[topeGCI] = valor;
+}
+
 void escribirEnPolaca(int valorTerminal, int pos){
+    printf("Escribiendo en polaca: %d %d\n", valorTerminal, pos);
     char valorStr[20];
     sprintf(valorStr, "%d", valorTerminal);
     strcpy(vectGCI[pos], valorStr);
@@ -667,6 +759,13 @@ void mostrarPila(){
     int i;
     for(i = 0; i <= topeGCI; i++){
         printf("%d\n", pilaGCI[i]);
+    }
+}
+
+void mostrarPilaGCI(){
+    int i;
+    for(i = 0; i < cantItemsGCI; i++){
+        printf("%s\n", vectGCI[i]);
     }
 }
 

@@ -26,6 +26,7 @@ int agregarCteFloatATabla(float valor, char* tipo);
 int agregarCteStringATabla(char* valor, char* tipo);
 int buscarEnTabla(char * name);
 int chequearTipos(int posEnTabla);
+int chequearTiposComp();
 
 
 #endif // INCLUDE_TABLA_H
