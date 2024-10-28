@@ -12,9 +12,9 @@ int pilaGCI[500];
 int topeGCI = -1;
 int cantItemsGCI = 0;
 
-valorPilaGci matrizIfAnidados[30][3];
-int nroPilaIf = -1;
-int topePilaIf[30];
+valorPilaGci matrizAnidados[30][3];
+int nroPilaAnidado = -1;
+int topePilaAnidado[30];
 int vectOR[30] = {0};
 
 void insertarEnPolaca(char *valorTerminal);

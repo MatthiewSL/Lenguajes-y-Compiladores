@@ -303,39 +303,41 @@ factor:
     | PA expresion_aritmetica PC {printf("Factor correcto\n");}
 
 //BLOQUES ESPECIALES
-bloque_if: //TODO: 
+bloque_if:
     si PA expresion_logica PC lla_If bloque LLC 
     {
-        while(topePilaIf[nroPilaIf] >= 0){
-            valorPilaGci valorAct = matrizIfAnidados[nroPilaIf][topePilaIf[nroPilaIf]];
+        while(topePilaAnidado[nroPilaAnidado] >= 0){
+            valorPilaGci valorAct = matrizAnidados[nroPilaAnidado][topePilaAnidado[nroPilaAnidado]];
             escribirEnPolacaPos(valorAct.valor == -1 ? cantItemsGCI+1 : valorAct.valor, valorAct.posicion);
-            topePilaIf[nroPilaIf]--;
+            topePilaAnidado[nroPilaAnidado]--;
         }
-        nroPilaIf--;
+        vectOR[nroPilaAnidado] = 0;
+        nroPilaAnidado--;
         printf("Bloque_if correcto\n");
     }
     | si PA expresion_logica PC lla_If bloque LLC SINO inicio_else bloque LLC 
     {
-        while(topePilaIf[nroPilaIf] >= 0){
-            valorPilaGci valorAct = matrizIfAnidados[nroPilaIf][topePilaIf[nroPilaIf]];
+        while(topePilaAnidado[nroPilaAnidado] >= 0){
+            valorPilaGci valorAct = matrizAnidados[nroPilaAnidado][topePilaAnidado[nroPilaAnidado]];
             escribirEnPolacaPos(valorAct.valor == -1 ? cantItemsGCI+1 : valorAct.valor, valorAct.posicion);
-            topePilaIf[nroPilaIf]--;
+            topePilaAnidado[nroPilaAnidado]--;
         }
-        nroPilaIf--;
+        vectOR[nroPilaAnidado] = 0;
+        nroPilaAnidado--;
         printf("Bloque_if correcto\n");
     }
 
 lla_If:
     LLA {
-        if(vectOR[nroPilaIf] == 1){
-            matrizIfAnidados[nroPilaIf][0].valor = cantItemsGCI;
+        if(vectOR[nroPilaAnidado] == 1){
+            matrizAnidados[nroPilaAnidado][0].valor = cantItemsGCI;
         }
         printf("Lla_If correcto\n");
     }
 
 si:
     SI {
-        nroPilaIf++;
+        nroPilaAnidado++;
     }
 
 inicio_else:
@@ -344,12 +346,12 @@ inicio_else:
         int auxBI = cantItemsGCI;
         insertarEnPolaca("BLANCO");
 
-        if(vectOR[nroPilaIf] != 1 && topePilaIf[nroPilaIf] > 0){
-            matrizIfAnidados[nroPilaIf][0].valor = cantItemsGCI;
-            matrizIfAnidados[nroPilaIf][1].valor = cantItemsGCI;
+        if(vectOR[nroPilaAnidado] != 1 && topePilaAnidado[nroPilaAnidado] > 0){
+            matrizAnidados[nroPilaAnidado][0].valor = cantItemsGCI;
+            matrizAnidados[nroPilaAnidado][1].valor = cantItemsGCI;
         }else{
-            escribirEnPolacaPos(cantItemsGCI, matrizIfAnidados[nroPilaIf][topePilaIf[nroPilaIf]].posicion);
-            topePilaIf[nroPilaIf]--;
+            escribirEnPolacaPos(cantItemsGCI, matrizAnidados[nroPilaAnidado][topePilaAnidado[nroPilaAnidado]].posicion);
+            topePilaAnidado[nroPilaAnidado]--;
         }
 
         apilarGCI(-1,auxBI);
@@ -387,7 +389,7 @@ op_and:
 op_or:
     OP_OR {
         int cambio = 0;
-        vectOR[nroPilaIf] = 1;
+        vectOR[nroPilaAnidado] = 1;
 
         if(strcmp(vectGCI[cantItemsGCI-1],"BNE") == 0){
             strcpy(vectGCI[cantItemsGCI-1], "BEQ");
@@ -444,20 +446,37 @@ comp_bool:
     }
 
 bloque_while:
-    MIENTRAS inicio_parent expresion_logica PC LLA bloque LLC 
+    mientras inicio_parent expresion_logica PC lla_while bloque LLC 
     {
         insertarEnPolaca("BI");
-        escribirEnPolacaPos(cantItemsGCI+2, pilaGCI[topeGCI]); //Es mas 2 porque me tengo que parar en la que le sigue al while y tener en cuenta la que le sigue al BI
-        topeGCI--;
-        escribirEnPolacaPos(pilaGCI[topeGCI], cantItemsGCI);
-        cantItemsGCI++;
-        topeGCI--;
+        while(topePilaAnidado[nroPilaAnidado] > 0){
+            valorPilaGci valorAct = matrizAnidados[nroPilaAnidado][topePilaAnidado[nroPilaAnidado]];
+            escribirEnPolacaPos(valorAct.valor == -1 ? cantItemsGCI+2 : valorAct.valor, valorAct.posicion);
+            topePilaAnidado[nroPilaAnidado]--;
+        }
+        insertarEnPolacaInt(matrizAnidados[nroPilaAnidado][topePilaAnidado[nroPilaAnidado]].valor);
+        topePilaAnidado[nroPilaAnidado]--;
+        nroPilaAnidado--;
         printf("Bloque_while correcto\n");
+    }
+
+lla_while:
+    LLA {
+        if(vectOR[nroPilaAnidado] == 1){
+            matrizAnidados[nroPilaAnidado][1].valor = cantItemsGCI;
+        }
+        printf("Lla_If correcto\n");
+    }
+
+mientras:
+    MIENTRAS {
+        nroPilaAnidado++;
+        printf("Mientras correcto\n");
     }
 
 inicio_parent:
     PA {
-        // apilarGCI(cantItemsGCI);
+        apilarGCI(cantItemsGCI,-1);
     }
 
 lectura:
@@ -661,9 +680,9 @@ void insertarEnPolacaFloat(float valorTerminal){
 }
 
 void apilarGCI(int valor,int posicion){
-    topePilaIf[nroPilaIf]++;
-    matrizIfAnidados[nroPilaIf][topePilaIf[nroPilaIf]].valor = valor;
-    matrizIfAnidados[nroPilaIf][topePilaIf[nroPilaIf]].posicion = posicion;
+    topePilaAnidado[nroPilaAnidado]++;
+    matrizAnidados[nroPilaAnidado][topePilaAnidado[nroPilaAnidado]].valor = valor;
+    matrizAnidados[nroPilaAnidado][topePilaAnidado[nroPilaAnidado]].posicion = posicion;
 }
 
 void escribirEnPolacaPos(int valorTerminal, int pos){
@@ -847,7 +866,7 @@ void escribirTabla(FILE* arch){
 void inicializarTopesPila(){
     int i;
     for(i = 0; i < 30; i++){
-        topePilaIf[i] = -1;
+        topePilaAnidado[i] = -1;
     }
 }
 

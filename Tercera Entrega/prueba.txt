@@ -7,28 +7,19 @@ int main() {
 	    c: int;
     }
 
-    si(a > b AND w > c){
-        escribir("b");
+    mientras(a > b){
+        escribir("a es mas grande que b");
 
-        si(a > b OR w > c){
-            escribir("b");
-            si(a > b OR w > c){
-                escribir("b");
+        mientras(a > b AND w < c){
+            escribir("a es mas grande que b");
+            si(a > b OR b < w){
+                escribir("a es mas grande que b");
+            } sino {
+                escribir("a es mas chico o igual a b");
             }
-            escribir("b");
         }
 
-        si(a > b OR w > c){
-            escribir("b");
-        }
 
-        escribir("b");
-    }sino{
-        si(a > b OR w > c){
-            escribir("b");
-        }
-         escribir("b");
     }
-
 
 }
