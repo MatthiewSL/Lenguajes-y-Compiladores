@@ -303,49 +303,39 @@ factor:
     | PA expresion_aritmetica PC {printf("Factor correcto\n");}
 
 //BLOQUES ESPECIALES
-bloque_if:
-    SI PA expresion_logica PC llaif bloque LLC 
+bloque_if: //TODO: 
+    si PA expresion_logica PC lla_If bloque LLC 
     {
-        topeGCI--;
-        if(huboOr == 1){
-            escribirEnPolaca(cantItemsGCI+1, pilaGCI[topeGCI]);
-            topeGCI--;
-            escribirEnPolaca(saltoOr, pilaGCI[topeGCI]);
-            topeGCI--;
-        }else{
-            while(pilaGCI[topeGCI] != -1 && topeGCI >= 0){
-                escribirEnPolaca(cantItemsGCI+1, pilaGCI[topeGCI]);
-                topeGCI--;
-            }
+        while(topePilaIf[nroPilaIf] >= 0){
+            valorPilaGci valorAct = matrizIfAnidados[nroPilaIf][topePilaIf[nroPilaIf]];
+            escribirEnPolacaPos(valorAct.valor == -1 ? cantItemsGCI+1 : valorAct.valor, valorAct.posicion);
+            topePilaIf[nroPilaIf]--;
         }
+        nroPilaIf--;
         printf("Bloque_if correcto\n");
     }
-    | SI PA expresion_logica PC llaif bloque LLC SINO inicio_else bloque LLC 
+    | si PA expresion_logica PC lla_If bloque LLC SINO inicio_else bloque LLC 
     {
-        escribirEnPolaca(cantItemsGCI+1, pilaGCI[topeGCI]);
-        topeGCI--;
-        if(huboOr == 1){
-            escribirEnPolaca(cantItemsGCI+1, pilaGCI[topeGCI]);
-            topeGCI--;
-            escribirEnPolaca(saltoOr, pilaGCI[topeGCI]);
-            topeGCI--;
-        }else{
-            while(pilaGCI[topeGCI] != -1 && topeGCI >= 0){
-                escribirEnPolaca(cantItemsGCI+1, pilaGCI[topeGCI]);
-                topeGCI--;
-            }
+        while(topePilaIf[nroPilaIf] >= 0){
+            valorPilaGci valorAct = matrizIfAnidados[nroPilaIf][topePilaIf[nroPilaIf]];
+            escribirEnPolacaPos(valorAct.valor == -1 ? cantItemsGCI+1 : valorAct.valor, valorAct.posicion);
+            topePilaIf[nroPilaIf]--;
         }
+        nroPilaIf--;
         printf("Bloque_if correcto\n");
     }
 
-llaif:
-    LLA
-    {
-        if(huboOr == 1){
-            saltoOr = cantItemsGCI;
+lla_If:
+    LLA {
+        if(vectOR[nroPilaIf] == 1){
+            matrizIfAnidados[nroPilaIf][0].valor = cantItemsGCI;
         }
-        apilarGCI(-1);
-        printf("Pc_if correcto\n");
+        printf("Lla_If correcto\n");
+    }
+
+si:
+    SI {
+        nroPilaIf++;
     }
 
 inicio_else:
@@ -353,9 +343,16 @@ inicio_else:
         insertarEnPolaca("BI");
         int auxBI = cantItemsGCI;
         insertarEnPolaca("BLANCO");
-        escribirEnPolaca(cantItemsGCI, pilaGCI[topeGCI]);
-        topeGCI--;
-        apilarGCI(auxBI);
+
+        if(vectOR[nroPilaIf] != 1 && topePilaIf[nroPilaIf] > 0){
+            matrizIfAnidados[nroPilaIf][0].valor = cantItemsGCI;
+            matrizIfAnidados[nroPilaIf][1].valor = cantItemsGCI;
+        }else{
+            escribirEnPolacaPos(cantItemsGCI, matrizIfAnidados[nroPilaIf][topePilaIf[nroPilaIf]].posicion);
+            topePilaIf[nroPilaIf]--;
+        }
+
+        apilarGCI(-1,auxBI);
         printf("Inicio_else correcto\n");
     }
 
@@ -367,7 +364,7 @@ expresion_logica:
         }
     | termino_logico op_or termino_logico
         {
-            insertarEnPolaca("BLANCO"); 
+            insertarEnPolaca("BLANCO");
             printf("Expresion_logica correcto\n");
         } 
     | OP_NOT termino_logico 
@@ -375,9 +372,9 @@ expresion_logica:
             insertarEnPolaca("BLANCO");
             printf("Expresion_logica correcto\n");
         }
-    | termino_logico 
+    | termino_logico
         {
-            insertarEnPolaca("BLANCO"); 
+            insertarEnPolaca("BLANCO");
             printf("Expresion_logica correcto\n");
         }
 
@@ -389,8 +386,8 @@ op_and:
 
 op_or:
     OP_OR {
-        huboOr = 1;
         int cambio = 0;
+        vectOR[nroPilaIf] = 1;
 
         if(strcmp(vectGCI[cantItemsGCI-1],"BNE") == 0){
             strcpy(vectGCI[cantItemsGCI-1], "BEQ");
@@ -420,9 +417,11 @@ termino_logico:
     {
         chequearTiposComp();
         cantVariableAsignadas = 0;
+
+
         insertarEnPolaca("CMP"); 
         insertarEnPolaca(branchActual);
-        apilarGCI(cantItemsGCI);
+        apilarGCI(-1,cantItemsGCI);
         printf("Termino_logico correcto\n");
     }
 
@@ -448,9 +447,9 @@ bloque_while:
     MIENTRAS inicio_parent expresion_logica PC LLA bloque LLC 
     {
         insertarEnPolaca("BI");
-        escribirEnPolaca(cantItemsGCI+2, pilaGCI[topeGCI]); //Es mas 2 porque me tengo que parar en la que le sigue al while y tener en cuenta la que le sigue al BI
+        escribirEnPolacaPos(cantItemsGCI+2, pilaGCI[topeGCI]); //Es mas 2 porque me tengo que parar en la que le sigue al while y tener en cuenta la que le sigue al BI
         topeGCI--;
-        escribirEnPolaca(pilaGCI[topeGCI], cantItemsGCI);
+        escribirEnPolacaPos(pilaGCI[topeGCI], cantItemsGCI);
         cantItemsGCI++;
         topeGCI--;
         printf("Bloque_while correcto\n");
@@ -458,7 +457,7 @@ bloque_while:
 
 inicio_parent:
     PA {
-        apilarGCI(cantItemsGCI);
+        // apilarGCI(cantItemsGCI);
     }
 
 lectura:
@@ -510,7 +509,7 @@ int agregarCteFloatATabla(float valor, char* tipo){
         system("Pause");
         exit(2);
     }
-    //Si no hay otra cte con el mismo valor...
+
     char valorStr[20];
     sprintf(valorStr, "%.2f", valor);
     printf("Agregando a tabla: %s\n", valorStr);
@@ -661,18 +660,13 @@ void insertarEnPolacaFloat(float valorTerminal){
     cantItemsGCI++;
 }
 
-
-void apilarGCI(int valor){
-    topeGCI++;
-    pilaGCI[topeGCI] = valor;
+void apilarGCI(int valor,int posicion){
+    topePilaIf[nroPilaIf]++;
+    matrizIfAnidados[nroPilaIf][topePilaIf[nroPilaIf]].valor = valor;
+    matrizIfAnidados[nroPilaIf][topePilaIf[nroPilaIf]].posicion = posicion;
 }
 
-void apilarOr(int valor){
-    topeGCI++;
-    pilaGCI[topeGCI] = valor;
-}
-
-void escribirEnPolaca(int valorTerminal, int pos){
+void escribirEnPolacaPos(int valorTerminal, int pos){
     printf("Escribiendo en polaca: %d %d\n", valorTerminal, pos);
     char valorStr[20];
     sprintf(valorStr, "%d", valorTerminal);
@@ -850,10 +844,18 @@ void escribirTabla(FILE* arch){
     }
 }
 
+void inicializarTopesPila(){
+    int i;
+    for(i = 0; i < 30; i++){
+        topePilaIf[i] = -1;
+    }
+}
+
 int main(int argc, char *argv[]){
     if((yyin = fopen(argv[1], "rt"))==NULL){
         printf("\nNo se puede abrir el archivo de prueba: %s\n", argv[1]);
     }else{
+        inicializarTopesPila();
         yyparse();
     }
 
