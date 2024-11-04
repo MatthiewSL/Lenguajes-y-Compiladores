@@ -7,6 +7,7 @@
 #include "./Includes/gci.h"
 #include "./Includes/gciFunciones.h"
 #include "./Includes/assembler.h"
+#include "./Includes/pila.h"
 
 int yystopparser=0;
 FILE  *yyin;
@@ -19,6 +20,9 @@ char branchActual[4];
 
 void eliminarComillas(char* cadena);
 void reemplazarEspaciosConGuion(char* cadena);
+void eliminarGuion(char *cadena);
+int esSimboloBinario(char* simbolo);
+char* getSymbolIns(char* simbolo);
 %}
 
 %union {
@@ -124,7 +128,7 @@ tipo:
 
 sentencia:
     asignacion PUNTOCOMA {insertarEnPolaca("SEN ASIG"); printf("Sentencia correcto\n");}
-	| bloque_if {insertarEnPolaca("SEN IF") ;printf("Sentencia correcto\n");}
+	| bloque_if {insertarEnPolaca("END_IF") ;printf("Sentencia correcto\n");}
     | ID OP_AS funcion PUNTOCOMA 
         {
             int pos = buscarEnTabla($1);
@@ -258,7 +262,7 @@ termino:
     }
 
 factor:
-    ID 
+    ID
     {
         int pos = buscarEnTabla($1);
         if(pos != -1){
@@ -273,26 +277,32 @@ factor:
     }
     | CONST_REAL 
     {
+        char nuevoValor[100];
+        sprintf(nuevoValor, "_%.2f", $1);
         strcpy(tiposVariablesAsignadas[cantVariableAsignadas], Float);
         cantVariableAsignadas++;
-        insertarEnPolacaFloat($1);
+        insertarEnPolaca(nuevoValor);
         agregarCteFloatATabla($1, CTE_FLOAT);
         printf("Factor correcto\n");
     }
     | CONST_STRING
     {
+        char nuevoValor[100];
+        sprintf(nuevoValor, "_%s", $1);
         strcpy(tiposVariablesAsignadas[cantVariableAsignadas], String);
         cantVariableAsignadas++;
-        insertarEnPolaca($1);
+        insertarEnPolaca(nuevoValor);
         reemplazarEspaciosConGuion($1);
-        agregarCteStringATabla($1, CTE_STRNG);
+        agregarCteStringATabla(nuevoValor, CTE_STRNG);
         printf("Factor correcto\n");
     }
     | CTE
     {
+        char nuevoValor[100];
+        sprintf(nuevoValor, "_%d", $1);
         strcpy(tiposVariablesAsignadas[cantVariableAsignadas], Int);
         cantVariableAsignadas++;
-        insertarEnPolacaInt($1);
+        insertarEnPolaca(nuevoValor);
         agregarCteIntATabla($1, CTE_INT);
         printf("Factor correcto\n");
     }
@@ -503,7 +513,7 @@ int agregarCteIntATabla(int valor, char* tipo){
     }
 
     char valorStr[20];
-    sprintf(valorStr, "%d", valor);
+    sprintf(valorStr, "_%d", valor);
 
     //Si no hay otra cte con el mismo valor...
     printf("Agregando a tabla: %s\n", valorStr);
@@ -530,7 +540,7 @@ int agregarCteFloatATabla(float valor, char* tipo){
     }
 
     char valorStr[20];
-    sprintf(valorStr, "%.2f", valor);
+    sprintf(valorStr, "_%.2f", valor);
     printf("Agregando a tabla: %s\n", valorStr);
 
     if(buscarEnTabla(valorStr) == -1){
@@ -810,7 +820,7 @@ void reemplazarEspaciosConGuion(char* cadena) {
 }
 
 void generarAssembler(){
-    FILE* arch = fopen("salida.asm", "wt");
+    FILE* arch = fopen("asm/Final.asm", "wt");
 
     if(!arch){
 		printf("No pude crear el archivo assembler\n");
@@ -818,42 +828,51 @@ void generarAssembler(){
 	}
 
     escribirInicio(arch);
+
     escribirTabla(arch);
-    // escribirInicioCodigo(arch);
-    // escribirFinal(arch);
+
+    escribirInicioCodigo(arch);
+
+    recorrerGci(arch);
+
+    escribirFinalCodigo(arch);
+
     fclose(arch);
 }
 
 
 void escribirInicio(FILE* arch){
-    fprintf(arch, "include number.asm\n\n.MODEL LARGE\n.386\n.STACK 200h\n\n");
+    fprintf(arch, "include number.asm\ninclude macros2.asm\n\n.MODEL LARGE\n.386\n.STACK 200h\n\n");
 }
 
 void escribirTabla(FILE* arch){
-    fprintf(arch, ".DATA\n");
+    fprintf(arch, ".DATA\n@aux dd ?\n");
     int i;
 
     for(i=0; i<cantVarInsertadas; i++){
         eliminarComillas(tabla[i].nombre);
+        char valorVariable[100];
+        strcpy(valorVariable,tabla[i].nombre);
+        eliminarGuion(valorVariable);
 
         if (strcmp(tabla[i].tipo, CTE_INT) == 0) {
-            fprintf(arch, "CTE_%s ", tabla[i].nombre);
-            fprintf(arch, "dd %s\n", tabla[i].nombre);
+            fprintf(arch, "%s ", tabla[i].nombre);
+            fprintf(arch, "dd %.2f\n", atof(valorVariable));
         }
 
         if (strcmp(tabla[i].tipo, CTE_FLOAT) == 0) {
-            fprintf(arch, "CTE_%s ", tabla[i].nombre);
-            fprintf(arch, "dd %s\n", tabla[i].nombre);
+            fprintf(arch, "%s ", tabla[i].nombre);
+            fprintf(arch, "dd %.2f\n", atof(valorVariable));
         }
 
         if (strcmp(tabla[i].tipo, CTE_STRNG) == 0) {
-            fprintf(arch, "CTE_%s ", tabla[i].nombre);
-            fprintf(arch, "db \"%s\"\n", tabla[i].nombre);
+            fprintf(arch, "%s ", tabla[i].nombre);
+            fprintf(arch, "db \"%s\",'$'\n", valorVariable);
         }
 
         if (strcmp(tabla[i].tipo, String) == 0) {
             fprintf(arch, "%s ", tabla[i].nombre);
-            fprintf(arch, "db ?\n");
+            fprintf(arch, "dd ?\n");
         }
 
         if (strcmp(tabla[i].tipo, Int) == 0 || strcmp(tabla[i].tipo, Float) == 0) {
@@ -862,6 +881,147 @@ void escribirTabla(FILE* arch){
         }
     }
 }
+
+void escribirInicioCodigo(FILE* arch){
+    fprintf(arch, "\n.CODE\nmain PROC\nmov AX, @DATA\nmov DS, AX\n\n");
+}
+
+int esSimboloBinario(char* simbolo){
+    return strcmp(simbolo, "+") == 0 || strcmp(simbolo, "-") == 0 || strcmp(simbolo, "*") == 0 || strcmp(simbolo, "/") == 0;
+}
+
+void recorrerGci(FILE* archAsm){
+    int i;
+    t_pila pila;
+    crearPila(&pila);
+    int saltoElse[100];
+    int saltoEndif[100];
+    int ifActual = -1;
+
+    for(i = 0; i < cantItemsGCI; i++){
+
+        if(i == saltoElse[ifActual]-1){
+            fprintf(archAsm, "else%d:\n",ifActual+1);
+            saltoElse[ifActual] = -1;
+        }
+
+        if(strstr(vectGCI[i], "SEN") != NULL){
+            fprintf(archAsm, "SENNNNNN\n");
+            continue;
+        }
+
+        if(!esSimboloBinario(vectGCI[i]) && strcmp(vectGCI[i], ":=") != 0 && strcmp(vectGCI[i], "CMP") != 0 && strcmp(vectGCI[i], "BI") != 0 && strcmp(vectGCI[i], "END_IF") != 0){
+
+            apilar(&pila, sizeof(vectGCI[i]), vectGCI[i]);
+
+        }else{
+            if(esSimboloBinario(vectGCI[i])){
+                char op2[100],op1[100];
+
+                desapilar(&pila,sizeof(op2),&op2);
+
+                desapilar(&pila,sizeof(op1),&op1);
+
+                fprintf(archAsm, "fld %s\n", op1);
+                fprintf(archAsm, "fld %s\n",op2);
+
+                fprintf(archAsm, "%s\n",getSymbolIns(vectGCI[i]));
+
+                char resultadoTemporal[100];
+                sprintf(resultadoTemporal, "@aux"); // Etiqueta temporal única
+                fprintf(archAsm, "fstp %s\n", resultadoTemporal); // Guardar el resultado en la etiqueta temporal
+                apilar(&pila, sizeof(resultadoTemporal), resultadoTemporal);
+            }
+
+
+            if(strcmp(vectGCI[i], ":=") == 0){
+                char op2[100],op1[100];
+
+                desapilar(&pila,sizeof(op2),&op2);
+                desapilar(&pila,sizeof(op1),&op1);
+
+                fprintf(archAsm, "fld %s\n",op1);
+                fprintf(archAsm, "fstp %s\n",op2);
+            }
+
+            if(strcmp(vectGCI[i],"CMP") == 0){
+                ifActual++;
+                char op2[100],op1[100];
+                desapilar(&pila,sizeof(op2),&op2);
+                desapilar(&pila,sizeof(op1),&op1);
+
+                fprintf(archAsm, "fld %s\n",op1);
+                fprintf(archAsm, "fld %s\n",op2);
+                fprintf(archAsm, "fxch\n");
+                fprintf(archAsm, "fcom\n");
+                fprintf(archAsm, "fstsw ax\n");
+                fprintf(archAsm, "sahf\n");
+                fprintf(archAsm, "%s else%d\n",getSymbolIns(vectGCI[i+1]),ifActual+1);
+                fprintf(archAsm, "then%d:\n",ifActual+1);
+                saltoElse[ifActual] = atoi(vectGCI[i+2]);
+                i++;
+            }
+
+            if(strcmp(vectGCI[i],"BI") == 0){
+                fprintf(archAsm, "jmp end_if%d\n",ifActual+1);
+                saltoEndif[ifActual] = vectGCI[i+1];
+            }
+
+            if(strcmp(vectGCI[i],"END_IF") == 0){
+                fprintf(archAsm, "end_if%d:\n",ifActual+1);
+                ifActual--;
+            }
+        }
+        
+    }
+}
+
+char* getSymbolIns(char* simbolo){
+    if(strcmp(simbolo,"+") == 0){
+        return "fadd";
+    }
+
+    if(strcmp(simbolo,"-") == 0){
+        return "fsub";
+    }
+
+    if(strcmp(simbolo,"*") == 0){
+        return "fmul";
+    }
+
+    if(strcmp(simbolo,"/") == 0){
+        return "fdiv";
+    }
+    
+    if(strcmp(simbolo,"BNE") == 0){
+        return "JNE";
+    }
+
+    if(strcmp(simbolo,"BEQ") == 0){
+        return "JE";
+    }
+
+    if(strcmp(simbolo,"BLE") == 0){
+        return "JNA";
+    }
+
+    if(strcmp(simbolo,"BGE") == 0){
+        return "JAE";
+    }
+
+}
+
+
+escribirFinalCodigo(FILE* arch){
+    fprintf(arch, "\n\nMOV AX, 4c00h\nINT 21h\nmain ENDP\nEND main\n");
+}
+
+void eliminarGuion(char *cadena) {
+    if (cadena[0] == '_') {
+        memmove(cadena, cadena + 1, strlen(cadena));
+    }
+}
+
 
 void inicializarTopesPila(){
     int i;
