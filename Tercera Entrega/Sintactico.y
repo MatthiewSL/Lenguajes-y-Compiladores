@@ -148,7 +148,7 @@ sentencia:
             cantVariableAsignadas = 0;
             printf("Sentencia correcto\n");    
         }
-	| bloque_while {insertarEnPolaca("SEN WHILE") ;printf("Sentencia correcto\n");}
+	| bloque_while {insertarEnPolaca("END_WHILE") ;printf("Sentencia correcto\n");}
 	| lectura PUNTOCOMA {insertarEnPolaca("SEN LEC") ;printf("Sentencia correcto\n");}
 	| escritura PUNTOCOMA {insertarEnPolaca("SEN ESC") ;printf("Sentencia correcto\n");}
 
@@ -316,6 +316,7 @@ factor:
 bloque_if:
     si PA expresion_logica PC lla_If bloque LLC 
     {
+        escribirEnPolacaPosString("INICIO_IF",posInicioBloque[nroPilaAnidado]);
         while(topePilaAnidado[nroPilaAnidado] >= 0){
             valorPilaGci valorAct = matrizAnidados[nroPilaAnidado][topePilaAnidado[nroPilaAnidado]];
             escribirEnPolacaPos(valorAct.valor == -1 ? cantItemsGCI+1 : valorAct.valor, valorAct.posicion);
@@ -327,6 +328,7 @@ bloque_if:
     }
     | si PA expresion_logica PC lla_If bloque LLC SINO inicio_else bloque LLC 
     {
+        escribirEnPolacaPosString("INICIO_IFELSE",posInicioBloque[nroPilaAnidado]);
         while(topePilaAnidado[nroPilaAnidado] >= 0){
             valorPilaGci valorAct = matrizAnidados[nroPilaAnidado][topePilaAnidado[nroPilaAnidado]];
             escribirEnPolacaPos(valorAct.valor == -1 ? cantItemsGCI+1 : valorAct.valor, valorAct.posicion);
@@ -348,6 +350,8 @@ lla_If:
 si:
     SI {
         nroPilaAnidado++;
+        posInicioBloque[nroPilaAnidado] = cantItemsGCI;
+        insertarEnPolaca("BLANCO");
     }
 
 inicio_else:
@@ -365,6 +369,7 @@ inicio_else:
         }
 
         apilarGCI(-1,auxBI);
+        insertarEnPolaca("ELSE");
         printf("Inicio_else correcto\n");
     }
 
@@ -480,6 +485,7 @@ lla_while:
 
 mientras:
     MIENTRAS {
+        insertarEnPolaca("INICIO_WHILE");
         nroPilaAnidado++;
         printf("Mientras correcto\n");
     }
@@ -695,6 +701,11 @@ void apilarGCI(int valor,int posicion){
     matrizAnidados[nroPilaAnidado][topePilaAnidado[nroPilaAnidado]].posicion = posicion;
 }
 
+void escribirEnPolacaPosString(char* valorTerminal, int pos){
+    printf("Escribiendo en polaca: %s %d\n", valorTerminal, pos);
+    strcpy(vectGCI[pos], valorTerminal);
+}
+
 void escribirEnPolacaPos(int valorTerminal, int pos){
     printf("Escribiendo en polaca: %d %d\n", valorTerminal, pos);
     char valorStr[20];
@@ -896,21 +907,18 @@ void recorrerGci(FILE* archAsm){
     crearPila(&pila);
     int saltoElse[100];
     int saltoEndif[100];
-    int ifActual = -1;
-
+    int ifActual = 0;
+    int banderaIf = 0;
+    int banderaIfElse = 0;
+    
     for(i = 0; i < cantItemsGCI; i++){
-
-        if(i == saltoElse[ifActual]-1){
-            fprintf(archAsm, "else%d:\n",ifActual+1);
-            saltoElse[ifActual] = -1;
-        }
-
         if(strstr(vectGCI[i], "SEN") != NULL){
-            fprintf(archAsm, "SENNNNNN\n");
+            fprintf(archAsm, "SENT\n");
             continue;
         }
 
-        if(!esSimboloBinario(vectGCI[i]) && strcmp(vectGCI[i], ":=") != 0 && strcmp(vectGCI[i], "CMP") != 0 && strcmp(vectGCI[i], "BI") != 0 && strcmp(vectGCI[i], "END_IF") != 0){
+
+        if(!esSimboloBinario(vectGCI[i]) && strcmp(vectGCI[i], ":=") != 0 && strcmp(vectGCI[i], "CMP") != 0 && strcmp(vectGCI[i], "BI") != 0 && strcmp(vectGCI[i], "END_IF") != 0 && strcmp(vectGCI[i], "END_WHILE") != 0 && strcmp(vectGCI[i], "INICIO_IF") != 0 && strcmp(vectGCI[i], "INICIO_WHILE") != 0 && strcmp(vectGCI[i], "INICIO_IFELSE") != 0 && strcmp(vectGCI[i], "ELSE") != 0){
 
             apilar(&pila, sizeof(vectGCI[i]), vectGCI[i]);
 
@@ -944,8 +952,24 @@ void recorrerGci(FILE* archAsm){
                 fprintf(archAsm, "fstp %s\n",op2);
             }
 
-            if(strcmp(vectGCI[i],"CMP") == 0){
+            if(strcmp(vectGCI[i],"INICIO_IF") == 0){
                 ifActual++;
+                banderaIf = 1;
+                fprintf(archAsm, "INICIO_IF%d:\n",ifActual);
+            }
+
+            if(strcmp(vectGCI[i],"INICIO_IFELSE") == 0){
+                ifActual++;
+                banderaIfElse = 1;
+                fprintf(archAsm, "INICIO_IF%d:\n",ifActual);
+            }
+
+            if(strcmp(vectGCI[i],"INICIO_WHILE") == 0){
+                ifActual++;
+                fprintf(archAsm, "INICIO_WHILE%d\n",ifActual);
+            }
+
+            if(strcmp(vectGCI[i],"CMP") == 0){
                 char op2[100],op1[100];
                 desapilar(&pila,sizeof(op2),&op2);
                 desapilar(&pila,sizeof(op1),&op1);
@@ -956,19 +980,34 @@ void recorrerGci(FILE* archAsm){
                 fprintf(archAsm, "fcom\n");
                 fprintf(archAsm, "fstsw ax\n");
                 fprintf(archAsm, "sahf\n");
-                fprintf(archAsm, "%s else%d\n",getSymbolIns(vectGCI[i+1]),ifActual+1);
-                fprintf(archAsm, "then%d:\n",ifActual+1);
-                saltoElse[ifActual] = atoi(vectGCI[i+2]);
-                i++;
+
+
+                if(banderaIf == 1){
+                    fprintf(archAsm, "%s END_IF%d\n",getSymbolIns(vectGCI[i+1]),ifActual);
+                    banderaIf = 0;
+                }
+
+                if(banderaIfElse == 1){
+                    fprintf(archAsm, "%s ELSE%d\n",getSymbolIns(vectGCI[i+1]),ifActual);
+                    banderaIfElse = 0;
+                }
             }
 
             if(strcmp(vectGCI[i],"BI") == 0){
-                fprintf(archAsm, "jmp end_if%d\n",ifActual+1);
-                saltoEndif[ifActual] = vectGCI[i+1];
+                fprintf(archAsm, "JMP END_IF%d\n",ifActual);
+            }
+
+            if(strcmp(vectGCI[i],"ELSE") == 0){
+                fprintf(archAsm, "ELSE%d:\n",ifActual);
             }
 
             if(strcmp(vectGCI[i],"END_IF") == 0){
-                fprintf(archAsm, "end_if%d:\n",ifActual+1);
+                fprintf(archAsm, "END_IF%d:\n",ifActual);
+                ifActual--;
+            }
+
+            if(strcmp(vectGCI[i],"END_WHILE") == 0){
+                fprintf(archAsm, "END_WHILE%d:\n",ifActual);
                 ifActual--;
             }
         }

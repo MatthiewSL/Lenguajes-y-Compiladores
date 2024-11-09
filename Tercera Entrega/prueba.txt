@@ -5,9 +5,4 @@ int main() {
         j : string;
     }
 
-    si(a > 0){
-        escribir("A");
-    }
-
-    escribir("A");
 }

@@ -17,10 +17,13 @@ int nroPilaAnidado = -1;
 int topePilaAnidado[30];
 int vectOR[30] = {0};
 
+int posInicioBloque[30] = {0};
+
 void insertarEnPolaca(char *valorTerminal);
 void insertarEnPolacaInt(int valorTerminal);
 void insertarEnPolacaFloat(float valorTerminal);
 void escribirEnPolacaPos(int valorTerminal, int pos);
+void escribirEnPolacaPosString(char* valorTerminal, int pos);
 void apilarGCI(int valor,int posicion);
 void guardarGCI();
 void mostrarPila();
