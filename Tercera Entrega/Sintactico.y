@@ -155,6 +155,11 @@ sentencia:
 funcion:
     TRIANGULO PA expresion_aritmetica comaN1 expresion_aritmetica comaN2 expresion_aritmetica n3 PC 
     {
+        agregarCteStringATabla("_equilatero", CTE_STRNG);
+        agregarCteStringATabla("_isosceles", CTE_STRNG);
+        agregarCteStringATabla("_escaleno", CTE_STRNG);
+        tipoVariable = String;
+        agregarATabla("temp");
         calcularTipoTriangulo();
         cantVariableAsignadas = 1;
         strcpy(tiposVariablesAsignadas[0], String);
@@ -319,7 +324,7 @@ bloque_if:
         escribirEnPolacaPosString("INICIO_IF",posInicioBloque[nroPilaAnidado]);
         while(topePilaAnidado[nroPilaAnidado] >= 0){
             valorPilaGci valorAct = matrizAnidados[nroPilaAnidado][topePilaAnidado[nroPilaAnidado]];
-            escribirEnPolacaPos(valorAct.valor == -1 ? cantItemsGCI+1 : valorAct.valor, valorAct.posicion);
+            escribirEnPolacaPos(valorAct.valor == -1 ? cantItemsGCI : valorAct.valor, valorAct.posicion);
             topePilaAnidado[nroPilaAnidado]--;
         }
         vectOR[nroPilaAnidado] = 0;
@@ -331,7 +336,7 @@ bloque_if:
         escribirEnPolacaPosString("INICIO_IFELSE",posInicioBloque[nroPilaAnidado]);
         while(topePilaAnidado[nroPilaAnidado] >= 0){
             valorPilaGci valorAct = matrizAnidados[nroPilaAnidado][topePilaAnidado[nroPilaAnidado]];
-            escribirEnPolacaPos(valorAct.valor == -1 ? cantItemsGCI+1 : valorAct.valor, valorAct.posicion);
+            escribirEnPolacaPos(valorAct.valor == -1 ? cantItemsGCI : valorAct.valor, valorAct.posicion);
             topePilaAnidado[nroPilaAnidado]--;
         }
         vectOR[nroPilaAnidado] = 0;
@@ -344,6 +349,7 @@ lla_If:
         if(vectOR[nroPilaAnidado] == 1){
             matrizAnidados[nroPilaAnidado][0].valor = cantItemsGCI;
         }
+        insertarEnPolaca("THEN");
         printf("Lla_If correcto\n");
     }
 
@@ -435,7 +441,6 @@ termino_logico:
         chequearTiposComp();
         cantVariableAsignadas = 0;
 
-
         insertarEnPolaca("CMP"); 
         insertarEnPolaca(branchActual);
         apilarGCI(-1,cantItemsGCI);
@@ -466,10 +471,10 @@ bloque_while:
         insertarEnPolaca("BI");
         while(topePilaAnidado[nroPilaAnidado] > 0){
             valorPilaGci valorAct = matrizAnidados[nroPilaAnidado][topePilaAnidado[nroPilaAnidado]];
-            escribirEnPolacaPos(valorAct.valor == -1 ? cantItemsGCI+2 : valorAct.valor, valorAct.posicion);
+            escribirEnPolacaPos(valorAct.valor == -1 ? cantItemsGCI+1 : valorAct.valor, valorAct.posicion);
             topePilaAnidado[nroPilaAnidado]--;
         }
-        insertarEnPolacaInt(matrizAnidados[nroPilaAnidado][topePilaAnidado[nroPilaAnidado]].valor);
+        insertarEnPolacaInt(matrizAnidados[nroPilaAnidado][topePilaAnidado[nroPilaAnidado]].valor-1);
         topePilaAnidado[nroPilaAnidado]--;
         nroPilaAnidado--;
         printf("Bloque_while correcto\n");
@@ -754,6 +759,7 @@ void finalizarSumaLosUltimos(){
 }
 
 void calcularTipoTriangulo(){
+    insertarEnPolaca("INICIO_TRIANGULO");
     insertarEnPolaca("@n1");
     insertarEnPolaca("@n2");
     insertarEnPolaca("CMP");
@@ -764,29 +770,34 @@ void calcularTipoTriangulo(){
     insertarEnPolaca("CMP");
     insertarEnPolaca("BNE");
     insertarEnPolacaInt(cantItemsGCI+4);
-    insertarEnPolaca("EQUILATERO");
+    insertarEnPolaca("equilatero");
     insertarEnPolaca("BI");
     insertarEnPolacaInt(cantItemsGCI+21);
-    insertarEnPolaca("ISOSCELES");
+    insertarEnPolaca("SALTO1");
+    insertarEnPolaca("isosceles");
     insertarEnPolaca("BI");
     insertarEnPolacaInt(cantItemsGCI+18);
+    insertarEnPolaca("SALTO2");
     insertarEnPolaca("@n2");
     insertarEnPolaca("@n3");
     insertarEnPolaca("CMP");
     insertarEnPolaca("BNE");
     insertarEnPolacaInt(cantItemsGCI+4);
-    insertarEnPolaca("ISOSCELES");
+    insertarEnPolaca("isosceles");
     insertarEnPolaca("BI");
     insertarEnPolacaInt(cantItemsGCI+10);
+    insertarEnPolaca("SALTO3");
     insertarEnPolaca("@n1");
     insertarEnPolaca("@n3");
     insertarEnPolaca("CMP");
     insertarEnPolaca("BNE");
-    insertarEnPolacaInt(cantItemsGCI+5);
-    insertarEnPolaca("ISOSCELES");
+    insertarEnPolacaInt(cantItemsGCI+4);
+    insertarEnPolaca("isosceles");
     insertarEnPolaca("BI");
     insertarEnPolacaInt(cantItemsGCI+2);
-    insertarEnPolaca("ESCALENO");
+    insertarEnPolaca("SALTO4");
+    insertarEnPolaca("escaleno");
+    insertarEnPolaca("FIN_TRIANGULO");
 }
 
 void mostrarPila(){
@@ -904,22 +915,28 @@ int esSimboloBinario(char* simbolo){
 void recorrerGci(FILE* archAsm){
     int i;
     t_pila pila;
+    t_pila pilaCondicionales;
     crearPila(&pila);
-    int ifActual = 0;
-    int whileActual = 0;
+    crearPila(&pilaCondicionales);
+    int saltoActual = 0;
+    int varPila;
 
-    int banderaIf = 0;
-    int banderaIfElse = 0;
-    int banderaWhile = 0;
+    int contSaltoTriangulo = 1;
     
+    int banderaTriangulo = 0;
+
     for(i = 0; i < cantItemsGCI; i++){
         if(strstr(vectGCI[i], "SEN") != NULL){
             fprintf(archAsm, "SENT\n");
             continue;
         }
 
+        if(strstr(vectGCI[i], "SALTO") != NULL){
+            fprintf(archAsm, "%s:\n", vectGCI[i]);
+            continue;
+        }
 
-        if(!esSimboloBinario(vectGCI[i]) && strcmp(vectGCI[i], ":=") != 0 && strcmp(vectGCI[i], "CMP") != 0 && strcmp(vectGCI[i], "BI") != 0 && strcmp(vectGCI[i], "END_IF") != 0 && strcmp(vectGCI[i], "END_WHILE") != 0 && strcmp(vectGCI[i], "INICIO_IF") != 0 && strcmp(vectGCI[i], "INICIO_WHILE") != 0 && strcmp(vectGCI[i], "INICIO_IFELSE") != 0 && strcmp(vectGCI[i], "ELSE") != 0){
+        if(!esSimboloBinario(vectGCI[i]) && strcmp(vectGCI[i], ":=") != 0 && strcmp(vectGCI[i], "CMP") != 0 && strcmp(vectGCI[i], "BI") != 0 && strcmp(vectGCI[i], "END_IF") != 0 && strcmp(vectGCI[i], "END_WHILE") != 0 && strcmp(vectGCI[i], "INICIO_IF") != 0 && strcmp(vectGCI[i], "INICIO_WHILE") != 0 && strcmp(vectGCI[i], "INICIO_IFELSE") != 0 && strcmp(vectGCI[i], "ELSE") != 0 && strcmp(vectGCI[i], "FIN_TRIANGULO") != 0 && strcmp(vectGCI[i], "INICIO_TRIANGULO") != 0 && strcmp(vectGCI[i], "equilatero") != 0 && strcmp(vectGCI[i], "isosceles") != 0 && strcmp(vectGCI[i], "escaleno") != 0 && strcmp(vectGCI[i], "THEN") != 0){  
 
             apilar(&pila, sizeof(vectGCI[i]), vectGCI[i]);
 
@@ -943,32 +960,55 @@ void recorrerGci(FILE* archAsm){
             }
 
 
-            if(strcmp(vectGCI[i], ":=") == 0){
+            if(strcmp(vectGCI[i], ":=") == 0 && banderaTriangulo == 0){
                 char op2[100],op1[100];
-
                 desapilar(&pila,sizeof(op2),&op2);
                 desapilar(&pila,sizeof(op1),&op1);
 
-                fprintf(archAsm, "fld %s\n",op1);
-                fprintf(archAsm, "fstp %s\n",op2);
+                int pos = buscarEnTabla(op2);
+
+                if(strcmp(tabla[pos].tipo, Int) == 0 || strcmp(tabla[pos].tipo, Float) == 0){
+                    fprintf(archAsm, "fld %s\n",op2);
+                    fprintf(archAsm, "fstp %s\n",op1);
+                }else{
+                    fprintf(archAsm, "lea EAX, %s\n",op2);
+                    fprintf(archAsm, "mov %s, EAX\n",op1);
+                }
+
+            }
+
+            if(strcmp(vectGCI[i], ":=") == 0 && banderaTriangulo == 1){
+                char op1[100];
+
+                desapilar(&pila,sizeof(op1),&op1);
+
+                fprintf(archAsm, "lea EAX, temp\n");
+                fprintf(archAsm, "mov %s, EAX\n",op1);
+
+                banderaTriangulo = 0;
             }
 
             if(strcmp(vectGCI[i],"INICIO_IF") == 0){
-                ifActual++;
-                banderaIf = 1;
-                fprintf(archAsm, "INICIO_IF%d:\n",ifActual);
+                apilar(&pilaCondicionales, sizeof(int), &saltoActual);
+                fprintf(archAsm, "INICIO_IF%d:\n",saltoActual);
+                saltoActual++;
             }
 
             if(strcmp(vectGCI[i],"INICIO_IFELSE") == 0){
-                ifActual++;
-                banderaIfElse = 1;
-                fprintf(archAsm, "INICIO_IF%d:\n",ifActual);
+                apilar(&pilaCondicionales, sizeof(int), &saltoActual);
+                fprintf(archAsm, "INICIO_IF%d:\n",saltoActual);
+                saltoActual++;
             }
 
             if(strcmp(vectGCI[i],"INICIO_WHILE") == 0){
-                whileActual++;
-                banderaWhile = 1;
-                fprintf(archAsm, "INICIO_WHILE%d:\n",whileActual);
+                apilar(&pilaCondicionales, sizeof(int), &saltoActual);
+                fprintf(archAsm, "INICIO_WHILE%d:\n",saltoActual);
+                saltoActual++;
+            }
+
+            if(strcmp(vectGCI[i],"INICIO_TRIANGULO") == 0){
+                banderaTriangulo = 1;
+                fprintf(archAsm, "INICIO_TRIANGULO:\n");
             }
 
             if(strcmp(vectGCI[i],"CMP") == 0){
@@ -983,45 +1023,47 @@ void recorrerGci(FILE* archAsm){
                 fprintf(archAsm, "fstsw ax\n");
                 fprintf(archAsm, "sahf\n");
 
+                int posSalto = atoi(vectGCI[i+2]);
 
-                if(banderaIf == 1){
-                    fprintf(archAsm, "%s END_IF%d\n",getSymbolIns(vectGCI[i+1]),ifActual);
-                    banderaIf = 0;
-                }
+                verTope(&pilaCondicionales,sizeof(int),&varPila);
 
-                if(banderaIfElse == 1){
-                    fprintf(archAsm, "%s ELSE%d\n",getSymbolIns(vectGCI[i+1]),ifActual);
-                }
-
-                if(banderaWhile == 1){
-                    fprintf(archAsm, "%s END_WHILE%d\n",getSymbolIns(vectGCI[i+1]),whileActual);
-                    banderaWhile = 0;
-                }
-
+                fprintf(archAsm, "%s %s%d\n",getSymbolIns(vectGCI[i+1]),vectGCI[posSalto],varPila);
             }
 
             if(strcmp(vectGCI[i],"BI") == 0){
-                if(banderaIfElse == 1){
-                    fprintf(archAsm, "JMP END_IF%d\n",ifActual);
-                    banderaIfElse = 0;
-                }else{
-                    fprintf(archAsm, "JMP INICIO_WHILE%d\n",whileActual);
-                }
+                int posSalto = atoi(vectGCI[i+1]);
+                fprintf(archAsm, "JMP %s%d\n",vectGCI[posSalto],saltoActual);
             }
 
             if(strcmp(vectGCI[i],"ELSE") == 0){
-                fprintf(archAsm, "ELSE%d:\n",ifActual);
+                verTope(&pilaCondicionales,sizeof(int),&varPila);
+                fprintf(archAsm, "ELSE%d:\n",varPila);
+            }
+
+            if(strcmp(vectGCI[i],"THEN") == 0){
+                verTope(&pilaCondicionales,sizeof(int),&varPila);
+                fprintf(archAsm, "THEN%d:\n",varPila);
             }
 
             if(strcmp(vectGCI[i],"END_IF") == 0){
-                fprintf(archAsm, "END_IF%d:\n",ifActual);
-                ifActual--;
+                desapilar(&pilaCondicionales,sizeof(int),&varPila);
+                fprintf(archAsm, "END_IF%d:\n",varPila);
             }
 
             if(strcmp(vectGCI[i],"END_WHILE") == 0){
-                fprintf(archAsm, "END_WHILE%d:\n",whileActual);
-                whileActual--;
+                desapilar(&pilaCondicionales,sizeof(int),&varPila);
+                fprintf(archAsm, "END_WHILE%d:\n",varPila);
             }
+
+            if(strcmp(vectGCI[i],"FIN_TRIANGULO") == 0){
+                fprintf(archAsm, "FIN_TRIANGULO:\n");
+            }
+
+            if(strcmp(vectGCI[i],"equilatero") == 0 || strcmp(vectGCI[i],"isosceles") == 0 || strcmp(vectGCI[i],"escaleno") == 0){
+                fprintf(archAsm, "lea EAX, _%s\n",vectGCI[i]);
+                fprintf(archAsm, "mov temp, EAX\n");
+            }
+
         }
         
     }
@@ -1058,6 +1100,14 @@ char* getSymbolIns(char* simbolo){
 
     if(strcmp(simbolo,"BGE") == 0){
         return "JAE";
+    }
+
+    if(strcmp(simbolo,"BGT") == 0){
+        return "JA";
+    }
+
+    if(strcmp(simbolo,"BLT") == 0){
+        return "JB";
     }
 
 }

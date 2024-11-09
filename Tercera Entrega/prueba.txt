@@ -1,23 +1,21 @@
 int main() {
     init {
-        a : int;
+        a : float;
         b, e : int;
         j : string;
     }
 
-    mientras(a < 0) {
-        escribir("a es menor que 0");
-        mientras(a < 0) {
-            escribir("a es menor que 0");
-            si(a < 0) {
-                escribir("a es menor que 0");
-            }sino{
-                escribir("a es menor que 0");
-                si(a < 0) {
-                    escribir("a es menor que 0");
-                }
-            }
+    si(a < 0 OR a > 17) {
+        escribir("hola");
+        
+        si(a < 0 OR a > 17) {
+            escribir("hola");
+        }
+
+        si(a > 0){
+            escribir("hola");
         }
     }
+    
 
 }
