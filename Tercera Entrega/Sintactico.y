@@ -905,11 +905,12 @@ void recorrerGci(FILE* archAsm){
     int i;
     t_pila pila;
     crearPila(&pila);
-    int saltoElse[100];
-    int saltoEndif[100];
     int ifActual = 0;
+    int whileActual = 0;
+
     int banderaIf = 0;
     int banderaIfElse = 0;
+    int banderaWhile = 0;
     
     for(i = 0; i < cantItemsGCI; i++){
         if(strstr(vectGCI[i], "SEN") != NULL){
@@ -965,8 +966,9 @@ void recorrerGci(FILE* archAsm){
             }
 
             if(strcmp(vectGCI[i],"INICIO_WHILE") == 0){
-                ifActual++;
-                fprintf(archAsm, "INICIO_WHILE%d\n",ifActual);
+                whileActual++;
+                banderaWhile = 1;
+                fprintf(archAsm, "INICIO_WHILE%d:\n",whileActual);
             }
 
             if(strcmp(vectGCI[i],"CMP") == 0){
@@ -989,12 +991,22 @@ void recorrerGci(FILE* archAsm){
 
                 if(banderaIfElse == 1){
                     fprintf(archAsm, "%s ELSE%d\n",getSymbolIns(vectGCI[i+1]),ifActual);
-                    banderaIfElse = 0;
                 }
+
+                if(banderaWhile == 1){
+                    fprintf(archAsm, "%s END_WHILE%d\n",getSymbolIns(vectGCI[i+1]),whileActual);
+                    banderaWhile = 0;
+                }
+
             }
 
             if(strcmp(vectGCI[i],"BI") == 0){
-                fprintf(archAsm, "JMP END_IF%d\n",ifActual);
+                if(banderaIfElse == 1){
+                    fprintf(archAsm, "JMP END_IF%d\n",ifActual);
+                    banderaIfElse = 0;
+                }else{
+                    fprintf(archAsm, "JMP INICIO_WHILE%d\n",whileActual);
+                }
             }
 
             if(strcmp(vectGCI[i],"ELSE") == 0){
@@ -1007,8 +1019,8 @@ void recorrerGci(FILE* archAsm){
             }
 
             if(strcmp(vectGCI[i],"END_WHILE") == 0){
-                fprintf(archAsm, "END_WHILE%d:\n",ifActual);
-                ifActual--;
+                fprintf(archAsm, "END_WHILE%d:\n",whileActual);
+                whileActual--;
             }
         }
         

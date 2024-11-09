@@ -5,4 +5,19 @@ int main() {
         j : string;
     }
 
+    mientras(a < 0) {
+        escribir("a es menor que 0");
+        mientras(a < 0) {
+            escribir("a es menor que 0");
+            si(a < 0) {
+                escribir("a es menor que 0");
+            }sino{
+                escribir("a es menor que 0");
+                si(a < 0) {
+                    escribir("a es menor que 0");
+                }
+            }
+        }
+    }
+
 }
