@@ -9,7 +9,6 @@ FILE *yyin;
 char *yyltext;
 
 int yyerror(void);
-
 %}
 
 %option noyywrap  
@@ -96,10 +95,11 @@ DOSPUNTOS ":"
                 }
                 printf("\nConstanteString: %s\n", yytext); 
                 yylval.strval = strdup(yytext);
+                eliminarComillas(yylval.strval);
                 return CONST_STRING; 
 }
 
-{INIT}          {printf("\nInit: %s\n", yytext);return INIT;}
+{INIT}          {printf("\nInit: %s\n", yytext);yylval.strval = strdup(yytext);return INIT;}
 {MAIN}			{printf("\nMain: %s\n", yytext);return MAIN;}
 {RETURN}		{printf("\nReturn: %s\n", yytext);return RETURN;}
 {FLOAT}			{printf("\nFloat: %s\n", yytext);return FLOAT;}
@@ -114,7 +114,7 @@ DOSPUNTOS ":"
 {SUMALOSULTIMOS}	{printf("\nSumaLosUltimos: %s\n", yytext);return SUMALOSULTIMOS;}
 
 
-{OP_AS}	        {printf("\nAsignacion: %s\n", yytext);return OP_AS;}
+{OP_AS}	        {printf("\nAsignacion: %s\n", yytext);yylval.strval = strdup(yytext);return OP_AS;}
 {OP_COMP}       {printf("\nComparacion: %s\n", yytext);return OP_COMP;}
 {OP_DIF}        {printf("\nDiferenteDe: %s\n", yytext);return OP_DIF;}
 {OP_MAYOR}      {printf("\nMayorQue: %s\n", yytext);return OP_MAYOR;}
@@ -122,10 +122,10 @@ DOSPUNTOS ":"
 {OP_AND}        {printf("\nOperadorY: %s\n", yytext);return OP_AND;}
 {OP_OR}         {printf("\nOperadorO: %s\n", yytext);return OP_OR;}
 {OP_NOT}        {printf("\nOperadorNot: %s\n", yytext);return OP_NOT;}
-{OP_SUM}        {printf("\nSuma: %s\n", yytext);return OP_SUM;}
-{OP_MUL}        {printf("\nMultiplicacion: %s\n", yytext);return OP_MUL;}
-{OP_RES}        {printf("\nOperador resta: %s\n", yytext);return OP_RES;}
-{OP_DIV}        {printf("\nDivision: %s\n", yytext);return OP_DIV;}
+{OP_SUM}        {printf("\nSuma: %s\n", yytext);yylval.strval = strdup(yytext);return OP_SUM;}
+{OP_MUL}        {printf("\nMultiplicacion: %s\n", yytext);yylval.strval = strdup(yytext);return OP_MUL;}
+{OP_RES}        {printf("\nOperador resta: %s\n", yytext);yylval.strval = strdup(yytext);return OP_RES;}
+{OP_DIV}        {printf("\nDivision: %s\n", yytext);yylval.strval = strdup(yytext);return OP_DIV;}
 
 {PA}	        {printf("\nParAbre: %s\n", yytext);return PA;}
 {PC}	        {printf("\nParCierra: %s\n", yytext);return PC;}

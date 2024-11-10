@@ -4,12 +4,12 @@ int main() {
         b, e : int;
         d : string;
         w : int;
-	c: int;
+	    c: int;
         *- escribir "Ingrese un numero"; -*
         *- en el init solo puedo tener declaraciones de variables -*
     }
 
-    a := -43.2;
+    a := 43.2;
     a := 43;
     e := 7;
     *- e := 800000;-*
@@ -20,22 +20,22 @@ int main() {
     *-no se puede asignar un string a una variable de enteros-*
 
     si (b > e) {
-        escribir("b es mas grande que e");
+        escribir("b > e");
         *- leer(w); -*
     } sino {
-        escribir("b es mas chico o igual a e");
+         escribir("b <= e");
     }
 
     mientras (b > e) {
         si (b > e) {
-            escribir("b es mas grande que e");
+            escribir("b > e");
         } sino {
-            escribir("b es mas chico o igual a e");
+            escribir("b <= e");
         }
     }
 
-    triangulo(b+2,e/4,w);
-    sumaLosUltimos(4;[2,3,4,5,6,7,8,9,10]);
+    d := triangulo(b+2,e/4,w);
+    a := sumaLosUltimos(4;[2,3,4,5,6,7,8,9,10]);
 
 si (a > b AND c > b)
 {
