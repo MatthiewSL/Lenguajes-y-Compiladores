@@ -213,6 +213,7 @@ n3:
 
 pivot:
  CTE {
+    agregarCteIntATabla($1,CTE_INT);
     pivotito = $1-1;
     printf("Pivot correcto\n");
     }
@@ -223,12 +224,24 @@ pivot:
     }
 
 lista_numeros:
-    valor_lista {printf("Lista_numeros correcto\n");}
-    | lista_numeros COMA valor_lista 
+    valor_lista {
+        printf("Lista_numeros correcto\n");
+    }
+    | lista_numeros COMA valor_lista {
+        printf("Lista_numeros correcto\n");
+    }
 
 valor_lista:
-    CTE {insertarSumaLosUltimos($1);printf("Valor_lista correcto\n");}
-    | CONST_REAL {insertarSumaLosUltimos($1);printf("Valor_lista correcto\n");}
+    CTE {
+        agregarCteIntATabla($1,CTE_INT);
+        insertarSumaLosUltimos($1);
+        printf("Valor_lista correcto\n");
+    }
+    | CONST_REAL {
+        agregarCteFloatATabla($1,CTE_FLOAT);
+        insertarSumaLosUltimos($1);
+        printf("Valor_lista correcto\n");
+    }
 
 bloque:
     sentencia bloque | sentencia {printf("Bloque correcto\n");}
@@ -812,13 +825,16 @@ void finalizarSumaLosUltimos(){
     }
 
     int i = pivotito,bandPrimeraVez = 0;
+    char nuevoValor[100];
 
     for(i; i < cantElementos; i++){
         if(bandPrimeraVez == 0){
-            insertarEnPolacaFloat(sumaLosUltimos[i]);
+            sprintf(nuevoValor, "_%.2f", sumaLosUltimos[i]);
+            insertarEnPolaca(nuevoValor);
             bandPrimeraVez = 1;
         }else{
-            insertarEnPolacaFloat(sumaLosUltimos[i]);
+            sprintf(nuevoValor, "_%.2f", sumaLosUltimos[i]);
+            insertarEnPolaca(nuevoValor);
             insertarEnPolaca("+");
         }
     }
@@ -1147,11 +1163,11 @@ void recorrerGci(FILE* archAsm){
             }
 
             if(strcmp(vectGCI[i],"SUMALOSULTIMOS") == 0){
-                fprintf(archAsm, "%s\n",vectGCI[i]);
+                fprintf(archAsm, "%s:\n",vectGCI[i]);
             }
 
             if(strcmp(vectGCI[i],"FIN_SUMALOSULTIMOS") == 0){
-                fprintf(archAsm, "%s\n",vectGCI[i]);
+                fprintf(archAsm, "%s:\n",vectGCI[i]);
             }
 
         }
