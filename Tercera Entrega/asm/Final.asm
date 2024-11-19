@@ -112,14 +112,14 @@ fxch
 fcom
 fstsw ax
 sahf
-JNE SALTO13
+JNE @n23
 fld @n2
 fld @n3
 fxch
 fcom
 fstsw ax
 sahf
-JNE SALTO23
+JNE SALTO13
 lea EAX, _equilatero
 mov temp, EAX
 JMP FIN_TRIANGULO3

@@ -846,7 +846,7 @@ void calcularTipoTriangulo(){
     insertarEnPolaca("@n2");
     insertarEnPolaca("CMP");
     insertarEnPolaca("BNE");
-    insertarEnPolacaInt(cantItemsGCI+14);
+    insertarEnPolacaInt(cantItemsGCI+13);
     insertarEnPolaca("@n2");
     insertarEnPolaca("@n3");
     insertarEnPolaca("CMP");
