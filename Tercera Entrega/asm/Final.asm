@@ -112,7 +112,7 @@ fxch
 fcom
 fstsw ax
 sahf
-JNE @n23
+JNE SALTO23
 fld @n2
 fld @n3
 fxch

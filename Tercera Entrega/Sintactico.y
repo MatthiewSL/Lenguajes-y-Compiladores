@@ -92,7 +92,9 @@ programa:
     | INT MAIN PA PC LLA bloque_dec LLC 
     {
         printf("Programa correcto\n");
+        guardarGCI();
         guardarTabla();
+        generarAssembler();
 	}
 
 bloque_dec:
@@ -681,10 +683,10 @@ void agregarATabla(char* nombre){
         printf("Variable %s agregada a la tabla\n", nombre);
 	}
 	else{
-        if(strstr(nombre, "@") != NULL){
+        if(strstr(nombre, "@") != NULL){//como es mia esta bien que este no hago nada
             return;
         }
-		printf("No se pueden ingresar variables con nombre repetido.\n");
+		printf("No se pueden ingresar variables con nombre repetido.\n");//si sali por repetida esta mal el prueba.txt
 		system("Pause");
 		exit(2);
 	}
