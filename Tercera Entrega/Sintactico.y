@@ -846,12 +846,12 @@ void calcularTipoTriangulo(){
     insertarEnPolaca("@n2");
     insertarEnPolaca("CMP");
     insertarEnPolaca("BNE");
-    insertarEnPolacaInt(cantItemsGCI+9);
+    insertarEnPolacaInt(cantItemsGCI+14);
     insertarEnPolaca("@n2");
     insertarEnPolaca("@n3");
     insertarEnPolaca("CMP");
     insertarEnPolaca("BNE");
-    insertarEnPolacaInt(cantItemsGCI+8);
+    insertarEnPolacaInt(cantItemsGCI+4);
     insertarEnPolaca("equilatero");
     insertarEnPolaca("BI");
     insertarEnPolacaInt(cantItemsGCI+25);
