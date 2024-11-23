@@ -308,7 +308,18 @@ factor:
     | CONST_REAL 
     {
         char nuevoValor[100];
-        sprintf(nuevoValor, "_%.2f", $1);
+        char flotanteConvertido[100];
+        int i;
+        sprintf(flotanteConvertido, "%.2f", $1);
+    
+        for (i = 0; flotanteConvertido[i] != '\0'; i++) {
+            if (flotanteConvertido[i] == '.') {
+                flotanteConvertido[i] = '_';
+            }
+        }
+    
+        sprintf(nuevoValor, "_%s", flotanteConvertido);
+    
         strcpy(tiposVariablesAsignadas[cantVariableAsignadas], Float);
         cantVariableAsignadas++;
         insertarEnPolaca(nuevoValor);
@@ -654,7 +665,7 @@ int agregarCteStringATabla(char* valor, char* tipo){
         strcpy(tabla[cantVarInsertadas].nombre,valor); 
 
         //Agregar longitud
-        tabla[cantVarInsertadas].longitud = strlen(valor)-2;
+        tabla[cantVarInsertadas].longitud = strlen(valor)-1;
         //Agregar nombre a tabla
         cantVarInsertadas++;
     }
@@ -754,8 +765,13 @@ void guardarTabla() {
     }
 
     for (i = 0; i < cantVarInsertadas; i++) {
-        fprintf(archivo, "Nombre: %s, Tipo de dato: %s, Longitud: %d\n",
+        if(strcmp(tabla[i].tipo, String) == 0 || strcmp(tabla[i].tipo, CTE_STRNG) == 0){
+            fprintf(archivo, "Nombre: %s, Tipo de dato: %s, Longitud: %d\n",
                 tabla[i].nombre, tabla[i].tipo, tabla[i].longitud);
+        }else{
+            fprintf(archivo, "Nombre: %s, Tipo de dato: %s\n",
+                tabla[i].nombre, tabla[i].tipo);
+        }
     }
 
     fclose(archivo);
@@ -968,7 +984,15 @@ void escribirTabla(FILE* arch){
         }
 
         if (strcmp(tabla[i].tipo, CTE_FLOAT) == 0) {
-            fprintf(arch, "%s ", tabla[i].nombre);
+            char valorConvertido[100];
+            int j;
+            strcpy(valorConvertido, tabla[i].nombre);
+            for (j = 0; valorConvertido[j] != '\0'; j++) {
+                if (valorConvertido[j] == '.') {
+                    valorConvertido[j] = '_';
+                }
+            }
+            fprintf(arch, "%s ", valorConvertido);
             fprintf(arch, "dd %.2f\n", atof(valorVariable));
         }
 
@@ -1161,7 +1185,7 @@ void recorrerGci(FILE* archAsm){
 
             if(strcmp(vectGCI[i],"equilatero") == 0 || strcmp(vectGCI[i],"isosceles") == 0 || strcmp(vectGCI[i],"escaleno") == 0){
                 fprintf(archAsm, "lea EAX, _%s\n",vectGCI[i]);
-                fprintf(archAsm, "mov temp, EAX\n");
+                fprintf(archAsm, "mov @temp, EAX\n");
             }
 
             if(strcmp(vectGCI[i],"SUMALOSULTIMOS") == 0){

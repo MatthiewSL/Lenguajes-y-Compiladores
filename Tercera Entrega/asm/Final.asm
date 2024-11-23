@@ -13,13 +13,13 @@ b dd ?
 d dd ?
 w dd ?
 c dd ?
-_43.20 dd 43.20
+_mensaje db "mensaje",'$'
+_43_20 dd 43.20
 _43 dd 43.00
 _7 dd 7.00
 _5 dd 5.00
-_ctecadena db "ctecadena",'$'
-_b_>_e db "b_>_e",'$'
-_b_<=_e db "b_<=_e",'$'
+_mayor db "mayor",'$'
+_menor db "menor",'$'
 _2 dd 2.00
 @n1 dd ?
 _4 dd 4.00
@@ -34,16 +34,32 @@ _6 dd 6.00
 _8 dd 8.00
 _9 dd 9.00
 _10 dd 10.00
-_Mensaje db "Mensaje",'$'
 _uwu db "uwu",'$'
-_mensaje db "mensaje",'$'
 
 .CODE
 main PROC
 mov AX, @DATA
 mov DS, AX
 
-fld _43.20
+INICIO_IF0:
+fld a
+fld b
+fxch
+fcom
+fstsw ax
+sahf
+JNA END_IF0
+fld c
+fld b
+fxch
+fcom
+fstsw ax
+sahf
+JNA END_IF0
+THEN0:
+DisplayString _mensaje
+END_IF0:
+fld _43_20
 fstp a
 fld _43
 fstp a
@@ -51,46 +67,44 @@ fld _7
 fstp e
 fld _5
 fstp b
-lea EAX, d
-mov _ctecadena, EAX
-INICIO_IF0:
+INICIO_IF1:
 fld b
 fld e
 fxch
 fcom
 fstsw ax
 sahf
-JNA ELSE0
-THEN0:
-DisplayString _b_>_e
-JMP END_IF0
-ELSE0:
-DisplayString _b_<=_e
-END_IF0:
-INICIO_WHILE1:
+JNA ELSE1
+THEN1:
+DisplayString _mayor
+JMP END_IF1
+ELSE1:
+DisplayString _menor
+END_IF1:
+INICIO_WHILE2:
 fld b
 fld e
 fxch
 fcom
 fstsw ax
 sahf
-JNA END_WHILE1
-INICIO_IF2:
+JNA END_WHILE2
+INICIO_IF3:
 fld b
 fld e
 fxch
 fcom
 fstsw ax
 sahf
-JNA ELSE2
-THEN2:
-DisplayString _b_>_e
-JMP END_IF2
-ELSE2:
-DisplayString _b_<=_e
-END_IF2:
-JMP INICIO_WHILE1
-END_WHILE1:
+JNA ELSE3
+THEN3:
+DisplayString _mayor
+JMP END_IF3
+ELSE3:
+DisplayString _menor
+END_IF3:
+JMP INICIO_WHILE2
+END_WHILE2:
 fld b
 fld _2
 fadd
@@ -105,54 +119,54 @@ fld @aux
 fstp @n2
 fld w
 fstp @n3
-INICIO_TRIANGULO3:
+INICIO_TRIANGULO4:
 fld @n1
 fld @n2
 fxch
 fcom
 fstsw ax
 sahf
-JNE SALTO23
+JNE SALTO24
 fld @n2
 fld @n3
 fxch
 fcom
 fstsw ax
 sahf
-JNE SALTO13
+JNE SALTO14
 lea EAX, _equilatero
-mov temp, EAX
-JMP FIN_TRIANGULO3
-SALTO13:
+mov @temp, EAX
+JMP FIN_TRIANGULO4
+SALTO14:
 lea EAX, _isosceles
-mov temp, EAX
-JMP FIN_TRIANGULO3
-SALTO23:
+mov @temp, EAX
+JMP FIN_TRIANGULO4
+SALTO24:
 fld @n2
 fld @n3
 fxch
 fcom
 fstsw ax
 sahf
-JNE SALTO33
+JNE SALTO34
 lea EAX, _isosceles
-mov temp, EAX
-JMP FIN_TRIANGULO3
-SALTO33:
+mov @temp, EAX
+JMP FIN_TRIANGULO4
+SALTO34:
 fld @n1
 fld @n3
 fxch
 fcom
 fstsw ax
 sahf
-JNE SALTO43
+JNE SALTO44
 lea EAX, _isosceles
-mov temp, EAX
-JMP FIN_TRIANGULO3
-SALTO43:
+mov @temp, EAX
+JMP FIN_TRIANGULO4
+SALTO44:
 lea EAX, _escaleno
-mov temp, EAX
-FIN_TRIANGULO3:
+mov @temp, EAX
+FIN_TRIANGULO4:
 lea EAX, d
 mov @temp, EAX
 SUMALOSULTIMOS:
@@ -179,24 +193,6 @@ fstp @aux
 FIN_SUMALOSULTIMOS:
 fld @aux
 fstp a
-INICIO_IF4:
-fld a
-fld b
-fxch
-fcom
-fstsw ax
-sahf
-JNA END_IF4
-fld c
-fld b
-fxch
-fcom
-fstsw ax
-sahf
-JNA END_IF4
-THEN4:
-DisplayString _Mensaje
-END_IF4:
 INICIO_IF5:
 fld a
 fld b

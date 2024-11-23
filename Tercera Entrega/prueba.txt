@@ -9,38 +9,36 @@ int main() {
         *- en el init solo puedo tener declaraciones de variables -*
     }
 
+    si (a > b AND c > b)
+{
+    escribir("mensaje");
+}
+
     a := 43.2;
     a := 43;
     e := 7;
     *- e := 800000;-*
     *- Error Cte fuera de rango -*
     b := 5;
-    d := "ctecadena";
     *- b = "hola"-*
     *-no se puede asignar un string a una variable de enteros-*
 
     si (b > e) {
-        escribir("b > e");
-        *- leer(w); -*
+        escribir("mayor");
     } sino {
-         escribir("b <= e");
+         escribir("menor");
     }
 
     mientras (b > e) {
         si (b > e) {
-            escribir("b > e");
+            escribir("mayor");
         } sino {
-            escribir("b <= e");
+            escribir("menor");
         }
     }
 
     d := triangulo(b+2,e/4,w);
     a := sumaLosUltimos(4;[2,3,4,5,6,7,8,9,10]);
-
-si (a > b AND c > b)
-{
-    escribir("Mensaje");
-}
 
 si (a > b OR c > b)
 {
