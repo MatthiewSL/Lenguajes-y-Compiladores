@@ -79,6 +79,8 @@ char* getSymbolIns(char* simbolo);
 %token COMA
 %token PUNTOCOMA
 %token DOSPUNTOS
+%start programa //si esta el programa arriba anda bien, si saco esta linea y el programa esta abajo no anda, si esta abajo con esta linea anda
+
 
 %%
 programa:
@@ -593,6 +595,7 @@ valor_escritura:
         agregarCteStringATabla(nuevoValor, CTE_STRNG);
         printf("Valor_escritura correcto\n");
     }
+
 %%
 
 int agregarCteIntATabla(int valor, char* tipo){
@@ -1245,7 +1248,7 @@ char* getSymbolIns(char* simbolo){
 }
 
 
-escribirFinalCodigo(FILE* arch){
+void escribirFinalCodigo(FILE* arch){
     fprintf(arch, "\n\nMOV AX, 4c00h\nINT 21h\nmain ENDP\nEND main\n");
 }
 
